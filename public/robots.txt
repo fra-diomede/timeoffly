@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /auth/login
+Allow: /auth/register
+Disallow: /dashboard
+Disallow: /ferie
+Disallow: /calendario
+Disallow: /team
+Disallow: /approvals
+Disallow: /admin
+Disallow: /profilo
+
+Sitemap: https://app.timeoffly.com/sitemap.xml

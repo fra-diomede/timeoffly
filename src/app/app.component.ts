@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { SeoService } from './core/services/seo.service';
 
 @Component({
   standalone: true,
@@ -8,4 +9,6 @@ import { RouterOutlet } from '@angular/router';
   styleUrls: ['./app.component.scss'],
   imports: [RouterOutlet]
 })
-export class AppComponent {}
+export class AppComponent {
+  private readonly seoService = inject(SeoService);
+}
