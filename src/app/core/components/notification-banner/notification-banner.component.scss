@@ -10,6 +10,20 @@
 }
 
 .notification-banner {
+  --banner-border: rgba(180, 35, 24, 0.2);
+  --banner-shadow: rgba(180, 35, 24, 0.12);
+  --banner-surface:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 28%),
+    linear-gradient(135deg, rgba(180, 35, 24, 0.1), rgba(255, 236, 236, 0.96));
+  --banner-icon-background: rgba(180, 35, 24, 0.12);
+  --banner-icon-color: #9f1d17;
+  --banner-eyebrow-color: #9f1d17;
+  --banner-message-color: #7a271a;
+  --banner-dismiss-border: rgba(180, 35, 24, 0.2);
+  --banner-dismiss-background: rgba(255, 255, 255, 0.74);
+  --banner-dismiss-background-hover: rgba(255, 255, 255, 0.92);
+  --banner-dismiss-color: #7a271a;
+
   width: 100%;
   display: flex;
   align-items: center;
@@ -17,11 +31,25 @@
   gap: 18px;
   padding: 18px 20px;
   border-radius: 24px;
-  border: 1px solid rgba(180, 35, 24, 0.2);
-  background:
+  border: 1px solid var(--banner-border);
+  background: var(--banner-surface);
+  box-shadow: 0 20px 42px var(--banner-shadow);
+}
+
+.notification-banner.is-success {
+  --banner-border: rgba(27, 116, 71, 0.2);
+  --banner-shadow: rgba(27, 116, 71, 0.14);
+  --banner-surface:
     radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 28%),
-    linear-gradient(135deg, rgba(180, 35, 24, 0.1), rgba(255, 236, 236, 0.96));
-  box-shadow: 0 20px 42px rgba(180, 35, 24, 0.12);
+    linear-gradient(135deg, rgba(27, 116, 71, 0.1), rgba(235, 251, 241, 0.96));
+  --banner-icon-background: rgba(27, 116, 71, 0.12);
+  --banner-icon-color: #16653f;
+  --banner-eyebrow-color: #16653f;
+  --banner-message-color: #1f5135;
+  --banner-dismiss-border: rgba(27, 116, 71, 0.2);
+  --banner-dismiss-background: rgba(255, 255, 255, 0.78);
+  --banner-dismiss-background-hover: rgba(255, 255, 255, 0.94);
+  --banner-dismiss-color: #1f5135;
 }
 
 .notification-banner__main {
@@ -40,8 +68,8 @@
   height: 44px;
   flex: 0 0 auto;
   border-radius: 14px;
-  background: rgba(180, 35, 24, 0.12);
-  color: #9f1d17;
+  background: var(--banner-icon-background);
+  color: var(--banner-icon-color);
 }
 
 .notification-banner__copy {
@@ -55,12 +83,12 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #9f1d17;
+  color: var(--banner-eyebrow-color);
 }
 
 .notification-banner__message {
   margin: 0;
-  color: #7a271a;
+  color: var(--banner-message-color);
   font-size: 16px;
   line-height: 1.5;
   font-weight: 600;
@@ -70,14 +98,14 @@
 .notification-banner__dismiss.mat-mdc-outlined-button:not(:disabled) {
   flex: 0 0 auto;
   align-self: center;
-  border-color: rgba(180, 35, 24, 0.2) !important;
-  background: rgba(255, 255, 255, 0.74);
-  color: #7a271a !important;
+  border-color: var(--banner-dismiss-border) !important;
+  background: var(--banner-dismiss-background);
+  color: var(--banner-dismiss-color) !important;
 }
 
 .notification-banner__dismiss.mat-mdc-outlined-button:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12px 24px rgba(180, 35, 24, 0.12);
+  background: var(--banner-dismiss-background-hover);
+  box-shadow: 0 12px 24px var(--banner-shadow);
 }
 
 @keyframes bannerFadeIn {

@@ -2,15 +2,16 @@
   <div
     class="notification-banner"
     [class.is-error]="banner.level === 'error'"
-    aria-live="assertive"
-    role="alert">
+    [class.is-success]="banner.level === 'success'"
+    [attr.aria-live]="getAriaLive(banner.level)"
+    [attr.role]="getRole(banner.level)">
     <div class="notification-banner__main">
       <div class="notification-banner__icon" aria-hidden="true">
-        <mat-icon>error</mat-icon>
+        <mat-icon>{{ getIcon(banner.level) }}</mat-icon>
       </div>
 
       <div class="notification-banner__copy">
-        <div class="notification-banner__eyebrow">Errore</div>
+        <div class="notification-banner__eyebrow">{{ getEyebrow(banner.level) }}</div>
         <p class="notification-banner__message">{{ banner.message }}</p>
       </div>
     </div>
@@ -20,7 +21,7 @@
       mat-stroked-button
       class="notification-banner__dismiss"
       (click)="dismiss()"
-      aria-label="Chiudi messaggio di errore">
+      [attr.aria-label]="getDismissLabel(banner.level)">
       Chiudi
     </button>
   </div>

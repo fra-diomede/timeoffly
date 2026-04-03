@@ -9,10 +9,12 @@ export interface NotificationOptions {
   actionLabel?: string;
   dedupeKey?: string;
   durationMs?: number;
+  dismissOnNavigation?: boolean;
   suppressDuplicates?: boolean;
 }
 
 export interface NotificationBanner {
+  dismissOnNavigation: boolean;
   level: NotificationLevel;
   message: string;
 }
@@ -29,6 +31,7 @@ export class NotificationService {
   private readonly defaultDurationMs = 4000;
   private readonly dedupeWindowMs = 1500;
   private readonly bannerSubject = new BehaviorSubject<NotificationBanner | null>(null);
+  private bannerTimerId: number | null = null;
   private lastNotification: NotificationState | null = null;
 
   readonly banner$ = this.bannerSubject.asObservable();
@@ -41,17 +44,23 @@ export class NotificationService {
     if (isPlatformBrowser(this.platformId)) {
       this.router.events
         .pipe(filter((event): event is NavigationStart => event instanceof NavigationStart))
-        .subscribe(() => this.dismiss());
+        .subscribe(() => this.handleNavigationStart());
     }
   }
 
   success(message: string, options?: NotificationOptions) {
-    this.dismiss();
-    this.openSnack(message, 'success', options);
+    this.openBanner(message, 'success', {
+      ...options,
+      dismissOnNavigation: options?.dismissOnNavigation ?? false,
+      durationMs: options?.durationMs ?? this.defaultDurationMs
+    });
   }
 
   error(message: string, options?: NotificationOptions) {
-    this.openBanner(message, 'error', options);
+    this.openBanner(message, 'error', {
+      ...options,
+      dismissOnNavigation: options?.dismissOnNavigation ?? true
+    });
   }
 
   info(message: string, options?: NotificationOptions) {
@@ -60,7 +69,8 @@ export class NotificationService {
   }
 
   dismiss() {
-    this.bannerSubject.next(null);
+    this.clearBanner();
+    this.snackBar.dismiss();
     this.lastNotification = null;
   }
 
@@ -80,15 +90,26 @@ export class NotificationService {
       return;
     }
 
+    this.snackBar.dismiss();
+    this.clearBannerTimer();
+
     this.lastNotification = {
       key: dedupeKey,
       timestamp: Date.now()
     };
 
     this.bannerSubject.next({
+      dismissOnNavigation: options?.dismissOnNavigation ?? true,
       level,
       message: normalizedMessage
     });
+
+    const durationMs = options?.durationMs ?? null;
+    if (durationMs && durationMs > 0) {
+      this.bannerTimerId = window.setTimeout(() => {
+        this.clearBanner();
+      }, durationMs);
+    }
   }
 
   private openSnack(message: string, level: NotificationLevel, options?: NotificationOptions) {
@@ -123,6 +144,30 @@ export class NotificationService {
 
   private isDuplicate(key: string): boolean {
     return !!this.lastNotification && this.lastNotification.key === key && Date.now() - this.lastNotification.timestamp < this.dedupeWindowMs;
+  }
+
+  private handleNavigationStart() {
+    this.snackBar.dismiss();
+
+    if (this.bannerSubject.value?.dismissOnNavigation === false) {
+      return;
+    }
+
+    this.clearBanner();
+  }
+
+  private clearBanner() {
+    this.clearBannerTimer();
+    this.bannerSubject.next(null);
+  }
+
+  private clearBannerTimer() {
+    if (this.bannerTimerId === null) {
+      return;
+    }
+
+    window.clearTimeout(this.bannerTimerId);
+    this.bannerTimerId = null;
   }
 
   private normalizeMessage(message: unknown): string | null {
