@@ -36,6 +36,9 @@ function buildSitemap(siteUrl) {
     <loc>${siteUrl}/</loc>
   </url>
   <url>
+    <loc>${siteUrl}/gestione-ferie-dipendenti</loc>
+  </url>
+  <url>
     <loc>${siteUrl}/auth/login</loc>
   </url>
   <url>
@@ -48,6 +51,7 @@ function buildSitemap(siteUrl) {
 function buildRobots(siteUrl) {
   return `User-agent: *
 Allow: /
+Allow: /gestione-ferie-dipendenti
 Allow: /auth/login
 Allow: /auth/register
 Allow: /privacy
@@ -90,3 +94,6 @@ await Promise.all([
 ]);
 
 console.log(`Synced site configuration with ${siteUrl}`);
+
+
+

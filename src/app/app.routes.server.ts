@@ -6,6 +6,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender
   },
   {
+    path: 'gestione-ferie-dipendenti',
+    renderMode: RenderMode.Prerender
+  },
+  {
     path: 'auth/login',
     renderMode: RenderMode.Prerender
   },

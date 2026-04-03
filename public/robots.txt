@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Allow: /gestione-ferie-dipendenti
 Allow: /auth/login
 Allow: /auth/register
 Allow: /privacy

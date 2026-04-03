@@ -2,12 +2,17 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { buildSiteUrl } from './core/config/site.config';
+import {
+  GESTIONE_FERIE_DIPENDENTI_DESCRIPTION,
+  GESTIONE_FERIE_DIPENDENTI_FAQ_STRUCTURED_DATA,
+  GESTIONE_FERIE_DIPENDENTI_TITLE
+} from './pages/gestione-ferie-dipendenti/gestione-ferie-dipendenti.seo';
 
 const PRIVATE_ROBOTS = 'noindex, nofollow';
 const BRAND_NAME = 'TimeOffly';
 const HOME_TITLE = 'TimeOffly | Gestione ferie e permessi';
 const HOME_DESCRIPTION =
-  'Gestisci ferie e permessi in modo semplice e intuitivo con TimeOffly. Calendario condiviso, approvazioni e visione chiara delle assenze del team.';
+  'Gestisci ferie, permessi e assenze del team in modo semplice e intuitivo con TimeOffly. Una soluzione piu ordinata rispetto a Excel.';
 const HOME_STRUCTURED_DATA = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -38,6 +43,22 @@ export const routes: Routes = [
       }
     },
     loadComponent: () => import('./pages/landing-page/landing-page.component').then(m => m.LandingPageComponent)
+  },
+  {
+    path: 'gestione-ferie-dipendenti',
+    title: GESTIONE_FERIE_DIPENDENTI_TITLE,
+    data: {
+      seo: {
+        description: GESTIONE_FERIE_DIPENDENTI_DESCRIPTION,
+        robots: 'index, follow',
+        canonicalPath: '/gestione-ferie-dipendenti',
+        structuredData: GESTIONE_FERIE_DIPENDENTI_FAQ_STRUCTURED_DATA
+      }
+    },
+    loadComponent: () =>
+      import('./pages/gestione-ferie-dipendenti/gestione-ferie-dipendenti.component').then(
+        m => m.GestioneFerieDipendentiComponent
+      )
   },
   {
     path: 'auth',

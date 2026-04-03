@@ -18,7 +18,7 @@ interface SeoRouteData {
 const DEFAULT_SEO = {
   title: 'TimeOffly | Gestione ferie e permessi',
   description:
-    'Gestisci ferie e permessi in modo semplice e intuitivo con TimeOffly. Calendario condiviso, approvazioni e visione chiara delle assenze del team.',
+    'Gestisci ferie, permessi e assenze del team in modo semplice e intuitivo con TimeOffly. Una soluzione piu ordinata rispetto a Excel.',
   robots: 'index, follow',
   canonicalPath: '/',
   ogType: 'website' as const

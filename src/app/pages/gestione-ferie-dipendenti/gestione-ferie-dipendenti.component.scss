@@ -2,11 +2,11 @@
   display: block;
 }
 
-.landing-page {
+.seo-page {
   min-height: 100vh;
 }
 
-.landing-shell {
+.seo-shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
   padding: 18px 0 48px;
@@ -14,7 +14,7 @@
   gap: 28px;
 }
 
-.landing-topbar {
+.seo-topbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -33,37 +33,41 @@
   align-items: center;
 }
 
-.landing-nav {
+.seo-nav {
   display: none;
   align-items: center;
   gap: 20px;
 }
 
-.landing-nav a,
-.footer-links a {
+.seo-nav a,
+.footer-links a,
+.hero-backlink {
   color: var(--text-soft);
   font-weight: 600;
 }
 
-.landing-nav a:hover,
-.footer-links a:hover {
+.seo-nav a:hover,
+.footer-links a:hover,
+.hero-backlink:hover {
   color: var(--brand-blue-strong);
 }
 
-.landing-topbar-actions,
-.hero-actions {
+.seo-topbar-actions,
+.hero-actions,
+.cta-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.landing-topbar-actions {
+.seo-topbar-actions {
   width: 100%;
 }
 
-.landing-topbar-actions a,
-.hero-actions a {
-  flex: 1 1 160px;
+.seo-topbar-actions a,
+.hero-actions a,
+.cta-actions a {
+  flex: 1 1 180px;
 }
 
 .hero-section {
@@ -103,7 +107,7 @@
 }
 
 .hero-copy,
-.hero-preview {
+.hero-panel {
   position: relative;
   z-index: 1;
 }
@@ -113,9 +117,14 @@
   gap: 18px;
 }
 
+.hero-backlink {
+  display: inline-flex;
+  width: fit-content;
+}
+
 .hero-eyebrow,
 .section-eyebrow,
-.preview-chip {
+.panel-label {
   display: inline-flex;
   width: fit-content;
   align-items: center;
@@ -138,9 +147,8 @@
 .section-heading h2,
 .cta-card h2,
 .footer-brand p,
-.info-card h3,
-.solution-card h3,
-.feature-card h3 {
+.content-card h3,
+.faq-card h3 {
   margin: 0;
 }
 
@@ -152,26 +160,26 @@
 }
 
 .hero-copy h1 {
-  font-size: clamp(2.35rem, 8vw, 4.25rem);
+  font-size: clamp(2.25rem, 7vw, 4rem);
   line-height: 0.98;
 }
 
 .hero-subtitle,
 .section-heading p,
-.info-card p,
-.solution-card p,
-.feature-card p,
+.content-card p,
+.faq-card p,
 .cta-card p,
-.footer-brand p {
+.footer-brand p,
+.panel-card p {
   margin: 0;
   font-size: 1rem;
   line-height: 1.7;
 }
 
 .hero-subtitle {
-  max-width: 640px;
+  max-width: 700px;
   font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .hero-highlights {
@@ -196,9 +204,12 @@
   color: rgba(255, 255, 255, 0.96);
 }
 
-.hero-preview {
+.hero-panel {
   display: grid;
   gap: 14px;
+}
+
+.panel-card {
   padding: 20px;
   border-radius: 26px;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -206,79 +217,22 @@
   backdrop-filter: blur(14px);
 }
 
-.preview-header,
-.preview-metrics,
-.preview-card-head,
-.solution-card-head,
-.feature-card-head,
-.footer-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.preview-chip {
-  color: white;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.preview-chip--success {
+.panel-card--accent {
   background: rgba(25, 201, 139, 0.18);
 }
 
-.preview-card {
-  flex: 1 1 180px;
-  padding: 18px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.preview-card--calendar {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.preview-card-head {
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.preview-card-head strong,
-.preview-card strong {
+.panel-card strong {
   display: block;
+  margin: 10px 0 8px;
   font-family: 'Sora', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.2;
 }
 
-.preview-card-head span,
-.metric-label {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.preview-card .mat-icon {
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.calendar-grid span {
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.calendar-grid .is-active {
-  background: rgba(255, 255, 255, 0.92);
-}
-
-.calendar-grid .is-success {
-  background: rgba(25, 201, 139, 0.9);
+.panel-label {
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .content-section {
@@ -286,18 +240,10 @@
   gap: 22px;
 }
 
-.content-section--split {
-  align-items: start;
-}
-
 .section-heading {
   display: grid;
   gap: 12px;
-  max-width: 760px;
-}
-
-.section-heading--compact {
-  max-width: 620px;
+  max-width: 780px;
 }
 
 .section-eyebrow {
@@ -319,62 +265,43 @@
 }
 
 .section-heading p,
-.info-card p,
-.solution-card p,
-.feature-card p,
-.editorial-card p,
+.content-card p,
 .faq-card p,
 .footer-brand p {
   color: var(--text-soft);
 }
 
 .card-grid,
-.solution-stack,
 .faq-grid {
   display: grid;
   gap: 16px;
 }
 
-.info-card,
-.solution-card,
-.feature-card,
-.editorial-card,
+.content-card,
+.comparison-card,
 .faq-card,
 .cta-card,
-.landing-footer {
+.seo-footer {
   border: 1px solid var(--border);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 255, 0.98));
   box-shadow: var(--shadow-2);
 }
 
-.info-card,
-.solution-card,
-.feature-card,
-.editorial-card,
+.content-card,
 .faq-card {
   padding: 22px;
   border-radius: 24px;
 }
 
-.info-card {
-  display: grid;
-  gap: 14px;
-}
-
-.solution-card,
-.feature-card,
-.faq-card {
+.content-card {
   display: grid;
   gap: 16px;
 }
 
-.editorial-card {
-  display: grid;
-  gap: 14px;
-}
-
-.solution-card-head,
-.feature-card-head {
+.solution-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   align-items: center;
 }
 
@@ -389,21 +316,56 @@
   color: var(--brand-blue-strong);
 }
 
-.section-link {
-  width: fit-content;
-  font-weight: 700;
-  color: var(--brand-blue-strong);
+.comparison-card {
+  padding: 10px;
+  border-radius: 28px;
 }
 
-.section-link:hover {
-  color: var(--brand-blue);
+.comparison-table-wrap {
+  overflow-x: auto;
+  border-radius: 20px;
 }
 
-.faq-card h3 {
-  margin: 0;
+.comparison-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 18px 20px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-table thead th {
   font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
   color: var(--brand-blue-strong);
-  letter-spacing: -0.03em;
+  background: rgba(23, 137, 255, 0.08);
+}
+
+.comparison-table tbody th {
+  width: 22%;
+  color: var(--brand-blue-strong);
+  font-weight: 700;
+}
+
+.comparison-table td {
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+
+.comparison-table tbody tr:last-child th,
+.comparison-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.faq-card {
+  display: grid;
+  gap: 10px;
 }
 
 .cta-card {
@@ -425,11 +387,7 @@
   color: rgba(255, 255, 255, 0.84);
 }
 
-.cta-card a {
-  width: 100%;
-}
-
-.landing-footer {
+.seo-footer {
   display: grid;
   gap: 20px;
   padding: 24px 22px;
@@ -442,6 +400,9 @@
 }
 
 .footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--border);
@@ -461,13 +422,13 @@
 }
 
 @media (min-width: 768px) {
-  .landing-shell {
+  .seo-shell {
     width: min(1180px, calc(100% - 48px));
     padding-top: 24px;
     gap: 34px;
   }
 
-  .landing-topbar-actions {
+  .seo-topbar-actions {
     width: auto;
   }
 
@@ -475,16 +436,12 @@
     padding: 34px 30px;
   }
 
-  .hero-actions a,
-  .cta-card a {
-    width: auto;
-  }
-
-  .card-grid--three {
+  .card-grid--two,
+  .faq-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .faq-grid {
+  .card-grid--three {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -496,24 +453,16 @@
 }
 
 @media (min-width: 960px) {
-  .landing-nav {
+  .seo-nav {
     display: flex;
   }
 
-  .hero-section,
-  .content-section--split {
-    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-  }
-
   .hero-section {
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
     align-items: center;
   }
 
   .card-grid--three {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .faq-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

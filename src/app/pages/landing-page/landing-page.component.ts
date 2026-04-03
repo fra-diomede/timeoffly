@@ -11,6 +11,11 @@ interface LandingItem {
   readonly description: string;
 }
 
+interface LandingFaqItem {
+  readonly question: string;
+  readonly answer: string;
+}
+
 @Component({
   selector: 'app-landing-page',
   standalone: true,
@@ -21,9 +26,9 @@ interface LandingItem {
 })
 export class LandingPageComponent {
   readonly heroHighlights = [
-    'Panoramica unica per ferie, permessi e assenze',
-    'Visibilita condivisa sulla disponibilita del team',
-    'Flusso ordinato tra richieste, calendario e monitoraggio'
+    'Ferie, permessi e assenze del team in un unico spazio',
+    'Visibilita condivisa sulle disponibilita del gruppo',
+    'Alternativa piu ordinata rispetto a Excel e gestione manuale'
   ];
 
   readonly problems: LandingItem[] = [
@@ -86,6 +91,30 @@ export class LandingPageComponent {
       title: 'Report e panoramica',
       description:
         'Controlla utilizzo, richieste e disponibilita con riepiloghi immediati che aiutano a decidere con piu contesto.'
+    }
+  ];
+
+  readonly editorialParagraphs = [
+    'Quando ferie e permessi passano tra fogli condivisi, email e conferme manuali, mantenere una vista chiara sul team diventa piu complicato del necessario.',
+    'Una gestione ferie piu ordinata aiuta a leggere disponibilita, assenze e richieste senza rincorrere versioni diverse dello stesso file o aggiornamenti sparsi.',
+    'TimeOffly raccoglie questi passaggi in un unico spazio e offre una visibilita condivisa piu leggibile per chi richiede, approva o deve pianificare il lavoro.'
+  ];
+
+  readonly faqs: LandingFaqItem[] = [
+    {
+      question: 'Come gestire ferie e permessi in modo piu chiaro?',
+      answer:
+        'Riunire richieste, approvazioni e calendario nello stesso punto aiuta a leggere meglio disponibilita e assenze del team.'
+    },
+    {
+      question: 'Esiste un alternativa a Excel per organizzare le assenze?',
+      answer:
+        'Si, una soluzione dedicata permette di evitare file sparsi e di mantenere una vista condivisa piu ordinata sulle richieste.'
+    },
+    {
+      question: 'TimeOffly e adatto anche a piccoli team?',
+      answer:
+        'Si, puo essere utile anche per team piccoli che vogliono gestire ferie e permessi con un processo piu semplice fin dall inizio.'
     }
   ];
 }
