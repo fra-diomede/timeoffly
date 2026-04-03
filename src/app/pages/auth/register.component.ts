@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { BrandLockupComponent } from '../../components/brand-lockup/brand-lockup.component';
@@ -68,16 +69,15 @@ export class RegisterComponent {
         oreTotali: typeof oreTotali === 'number' ? oreTotali : Number(oreTotali ?? 0),
         password: password ?? ''
       })
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
       .subscribe({
         next: () => {
           this.notifications.success('Registrazione completata. Ora puoi accedere.');
-          this.router.navigate(['/auth/login']);
-        },
-        error: () => {
-          this.loading = false;
-        },
-        complete: () => {
-          this.loading = false;
+          void this.router.navigate(['/auth/login']);
         }
       });
   }

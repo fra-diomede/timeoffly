@@ -1,10 +1,12 @@
-﻿import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap, map, finalize } from 'rxjs/operators';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { finalize, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, AuthSession, LoginRequest, RefreshRequest, RegisterRequest } from '../../models/auth.model';
+import { SKIP_GLOBAL_HTTP_ERROR_HANDLING } from '../interceptors/error-handler.context';
 import { TokenStorageService } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -16,7 +18,8 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private storage: TokenStorageService,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: object
   ) {
     this.sessionSubject = new BehaviorSubject<AuthSession | null>(this.storage.getSession());
     this.session$ = this.sessionSubject.asObservable();
@@ -36,7 +39,9 @@ export class AuthService {
   refresh(): Observable<AuthSession> {
     const refreshToken = this.getRefreshToken();
     const payload: RefreshRequest = { refreshToken: refreshToken ?? '' };
-    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/refresh`, payload).pipe(
+    const context = new HttpContext().set(SKIP_GLOBAL_HTTP_ERROR_HANDLING, true);
+
+    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/refresh`, payload, { context }).pipe(
       map(resp => this.applyAuthResponse(resp, true)),
       tap(session => this.setSession(session))
     );
@@ -48,13 +53,23 @@ export class AuthService {
       this.clearSession();
       return of(void 0);
     }
+
     return this.http.post<void>(`${this.baseUrl}/auth/logout`, { refreshToken }).pipe(
       finalize(() => this.clearSession())
     );
   }
 
   redirectToLogin() {
-    this.router.navigate(['/auth/login']);
+    if (!isPlatformBrowser(this.platformId) || this.router.url.startsWith('/auth/')) {
+      return;
+    }
+
+    void this.router.navigate(['/auth/login'], { replaceUrl: true });
+  }
+
+  handleUnauthorized() {
+    this.clearSession();
+    this.redirectToLogin();
   }
 
   getAccessToken() {

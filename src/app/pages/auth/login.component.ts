@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { BrandLockupComponent } from '../../components/brand-lockup/brand-lockup.component';
@@ -55,17 +56,18 @@ export class LoginComponent implements OnInit {
     if (this.form.invalid || this.loading) return;
     this.loading = true;
     const { username, password } = this.form.getRawValue();
-    this.authService.login({ username: username ?? '', password: password ?? '' }).subscribe({
-      next: () => {
-        this.notifications.success('Accesso effettuato con successo');
-        this.router.navigate(['/dashboard']);
-      },
-      error: () => {
-        this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
-      }
-    });
+    this.authService
+      .login({ username: username ?? '', password: password ?? '' })
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.notifications.success('Accesso effettuato con successo');
+          void this.router.navigate(['/dashboard']);
+        }
+      });
   }
 }

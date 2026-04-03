@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
@@ -6,6 +6,7 @@ import {
   HttpEvent
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { isAuthRequest } from './auth-request.util';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    if (this.isAuthRequest(req.url)) {
+    if (isAuthRequest(req.url)) {
       return next.handle(req);
     }
 
@@ -28,10 +29,7 @@ export class AuthInterceptor implements HttpInterceptor {
         Authorization: `${session?.tokenType ?? 'Bearer'} ${token}`
       }
     });
-    return next.handle(authReq);
-  }
 
-  private isAuthRequest(url: string): boolean {
-    return url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh');
+    return next.handle(authReq);
   }
 }

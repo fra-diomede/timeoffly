@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfiloService } from '../../core/services/profilo.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -92,11 +93,14 @@ export class ProfileComponent {
     this.profiloService.delete(this.session.username, this.deletePassword).subscribe({
       next: () => {
         this.notifications.success('Account eliminato');
-        this.authService.logout().subscribe({
-          next: () => this.authService.redirectToLogin(),
-          error: () => this.authService.redirectToLogin(),
-          complete: () => this.authService.redirectToLogin()
-        });
+        this.authService
+          .logout()
+          .pipe(
+            finalize(() => {
+              this.authService.redirectToLogin();
+            })
+          )
+          .subscribe();
       }
     });
   }

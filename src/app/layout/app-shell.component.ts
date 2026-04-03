@@ -7,8 +7,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
+import { finalize, Observable } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
-import { Observable } from 'rxjs';
 import { AuthSession } from '../models/auth.model';
 import { BrandLockupComponent } from '../components/brand-lockup/brand-lockup.component';
 
@@ -60,11 +60,14 @@ export class AppShellComponent {
   }
 
   logout() {
-    this.authService.logout().subscribe({
-      next: () => this.authService.redirectToLogin(),
-      error: () => this.authService.redirectToLogin(),
-      complete: () => this.authService.redirectToLogin()
-    });
+    this.authService
+      .logout()
+      .pipe(
+        finalize(() => {
+          this.authService.redirectToLogin();
+        })
+      )
+      .subscribe();
   }
 
   displayName(user: AuthSession | null): string {

@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
@@ -8,6 +8,7 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { isAuthRequest } from './auth-request.util';
 import { AuthService } from '../services/auth.service';
 import { RefreshTokenService } from '../services/refresh-token.service';
 
@@ -20,8 +21,8 @@ export class RefreshInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status !== 401 || this.isAuthRequest(req.url)) {
+      catchError((error: unknown) => {
+        if (!(error instanceof HttpErrorResponse) || error.status !== 401 || isAuthRequest(req.url)) {
           return throwError(() => error);
         }
 
@@ -29,25 +30,23 @@ export class RefreshInterceptor implements HttpInterceptor {
           switchMap(() => {
             const token = this.authService.getAccessToken();
             if (!token) {
-              this.authService.redirectToLogin();
+              this.authService.clearSession();
               return throwError(() => error);
             }
+
             const tokenType = this.authService.getSession()?.tokenType ?? 'Bearer';
             const retry = req.clone({
               setHeaders: { Authorization: `${tokenType} ${token}` }
             });
+
             return next.handle(retry);
           }),
-          catchError(refreshErr => {
-            this.authService.redirectToLogin();
-            return throwError(() => refreshErr);
+          catchError(() => {
+            this.authService.clearSession();
+            return throwError(() => error);
           })
         );
       })
     );
-  }
-
-  private isAuthRequest(url: string): boolean {
-    return url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh');
   }
 }

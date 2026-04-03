@@ -1,4 +1,4 @@
-import { importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -10,7 +10,7 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { RefreshInterceptor } from './core/interceptors/refresh.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
-export const appConfig = {
+export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withFetch(), withInterceptorsFromDi()),
