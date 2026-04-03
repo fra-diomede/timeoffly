@@ -27,11 +27,6 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               {
-                "glob": "favicon.ico",
-                "input": "public",
-                "output": "/"
-              },
-              {
                 "glob": "robots.txt",
                 "input": "public",
                 "output": "/"
@@ -112,11 +107,6 @@
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              {
-                "glob": "favicon.ico",
-                "input": "public",
-                "output": "/"
-              },
               {
                 "glob": "robots.txt",
                 "input": "public",

@@ -35,7 +35,7 @@ Il progetto e' predisposto per integrazione con backend REST e supporta SSR, laz
 - Workspace manager per team e approvazioni
 - Area admin per controllo operativo e supervisione
 - Profilo utente con dati account e preferenze
-- Design system TimeOffly con palette dedicata, logo condiviso e favicon custom
+- Design system TimeOffly con palette dedicata, logo condiviso e mark SVG usato anche come favicon
 - Ottimizzazione bundle tramite lazy loading della shell applicativa
 
 ## Stack tecnico
@@ -185,7 +185,7 @@ npm run serve:ssr:dashboard-ferie
 Il progetto include il sistema visuale TimeOffly:
 
 - logo principale in `public/brand/timeoffly-logo.svg`
-- mark/favicon in `public/brand/timeoffly-mark.svg`
+- mark SVG usato anche come favicon in `public/brand/timeoffly-mark.svg`
 - lockup riusabile in `src/app/components/brand-lockup/brand-lockup.component.ts`
 - token visuali globali in `src/styles.scss`
 
