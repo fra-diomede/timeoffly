@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://app.timeoffly.com/auth/login</loc>
+    <loc>https://timeoffly-bice.vercel.app/auth/login</loc>
   </url>
   <url>
-    <loc>https://app.timeoffly.com/auth/register</loc>
+    <loc>https://timeoffly-bice.vercel.app/auth/register</loc>
   </url>
 </urlset>
