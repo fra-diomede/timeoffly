@@ -12,4 +12,4 @@ Disallow: /approvals
 Disallow: /admin
 Disallow: /profilo
 
-Sitemap: https://app.timeoffly.com/sitemap.xml
+Sitemap: https://timeoffly-bice.vercel.app/sitemap.xml

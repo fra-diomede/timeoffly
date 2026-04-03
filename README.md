@@ -66,17 +66,22 @@ npm install
 - `src/environments/environment.ts`
 - `src/environments/environment.prod.ts`
 
-3. Avvia il progetto in locale:
+3. Se devi cambiare il dominio pubblico dell'app, aggiorna:
+
+- `src/config/site.config.json`
+
+4. Avvia il progetto in locale:
 
 ```bash
 npm start
 ```
 
-4. Apri il browser su `http://localhost:4200/`.
+5. Apri il browser su `http://localhost:4200/`.
 
 ## Configurazione ambienti
 
 L'app legge il backend base URL dai file environment.
+Il dominio pubblico usato per canonical, sitemap, robots e SEO statico e' centralizzato in `src/config/site.config.json`.
 
 ### Sviluppo
 
@@ -92,11 +97,12 @@ export const environment = {
 ```ts
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://app.timeoffly.com/timeoffly-app'
+  apiBaseUrl: 'https://timeoffly-app.onrender.com/timeoffly-app'
 };
 ```
 
 Se il backend cambia, e' sufficiente aggiornare `apiBaseUrl` nel file ambiente corretto.
+Se cambia il dominio frontend, e' sufficiente aggiornare `publicAppUrl` in `src/config/site.config.json`.
 
 ## Script disponibili
 
@@ -105,6 +111,7 @@ Se il backend cambia, e' sufficiente aggiornare `apiBaseUrl` nel file ambiente c
 | `npm start` | Avvia il dev server Angular |
 | `npm run build` | Genera la build production con SSR |
 | `npm run watch` | Build in watch mode per sviluppo |
+| `npm run sync:site` | Sincronizza `index.html`, `robots.txt` e `sitemap.xml` dal dominio pubblico configurato |
 | `npm test` | Esegue i test unitari con Karma/Jasmine |
 | `npm run serve:ssr:dashboard-ferie` | Avvia il server SSR dalla build generata |
 

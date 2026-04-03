@@ -1,8 +1,9 @@
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { filter, startWith } from 'rxjs/operators';
+import { buildSiteUrl } from '../config/site.config';
 
 interface SeoRouteData {
   description?: string;
@@ -20,16 +21,13 @@ const DEFAULT_SEO = {
   ogType: 'website' as const
 };
 
-const SITE_URL = 'https://app.timeoffly.com';
-
 @Injectable({ providedIn: 'root' })
 export class SeoService {
   constructor(
     private router: Router,
     private title: Title,
     private meta: Meta,
-    @Inject(DOCUMENT) private document: Document,
-    @Inject(PLATFORM_ID) private platformId: object
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.router.events
       .pipe(
@@ -82,7 +80,7 @@ export class SeoService {
     }
 
     const normalizedPath = this.normalizePath(path);
-    return `${this.getSiteOrigin()}${normalizedPath}`;
+    return buildSiteUrl(normalizedPath);
   }
 
   private normalizePath(path: string): string {
@@ -97,16 +95,6 @@ export class SeoService {
 
   private stripQueryAndFragment(url: string): string {
     return url.split('#')[0].split('?')[0] || '/';
-  }
-
-  private getSiteOrigin(): string {
-    const documentOrigin = this.document.location?.origin?.replace(/\/+$/, '');
-
-    if (isPlatformBrowser(this.platformId) && documentOrigin) {
-      return documentOrigin;
-    }
-
-    return SITE_URL.replace(/\/+$/, '');
   }
 
   private updateCanonical(url: string) {

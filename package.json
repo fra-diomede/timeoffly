@@ -2,6 +2,10 @@
   "name": "dashboard-ferie",
   "version": "0.0.0",
   "scripts": {
+    "sync:site": "node scripts/sync-site-config.mjs",
+    "prestart": "npm run sync:site",
+    "prebuild": "npm run sync:site",
+    "prewatch": "npm run sync:site",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
