@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { routes } from './app.routes';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
@@ -14,7 +14,7 @@ export const appConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withFetch(), withInterceptorsFromDi()),
-    provideAnimations(),
+    provideAnimationsAsync(),
     importProvidersFrom(MatSnackBarModule),
     MatNativeDateModule,
     { provide: MAT_DATE_LOCALE, useValue: 'it-IT' },
