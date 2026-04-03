@@ -32,6 +32,11 @@
                 "output": "/"
               },
               {
+                "glob": "favicon.ico",
+                "input": "public",
+                "output": "/"
+              },
+              {
                 "glob": "sitemap.xml",
                 "input": "public",
                 "output": "/"
@@ -109,6 +114,11 @@
             "assets": [
               {
                 "glob": "robots.txt",
+                "input": "public",
+                "output": "/"
+              },
+              {
+                "glob": "favicon.ico",
                 "input": "public",
                 "output": "/"
               },

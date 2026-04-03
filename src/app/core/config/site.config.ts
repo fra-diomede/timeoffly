@@ -24,7 +24,7 @@ export function buildSiteUrl(path = '/'): string {
   const cleanPath = stripQueryAndFragment(path).trim();
 
   if (!cleanPath || cleanPath === '/') {
-    return siteConfig.publicAppUrl;
+    return `${siteConfig.publicAppUrl}/`;
   }
 
   const normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;

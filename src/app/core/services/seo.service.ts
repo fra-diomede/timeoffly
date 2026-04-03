@@ -5,21 +5,26 @@ import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { filter, startWith } from 'rxjs/operators';
 import { buildSiteUrl } from '../config/site.config';
 
+type JsonLdSchema = Record<string, unknown>;
+
 interface SeoRouteData {
   description?: string;
   robots?: string;
   canonicalPath?: string;
   ogType?: 'website' | 'profile' | 'article';
+  structuredData?: JsonLdSchema;
 }
 
 const DEFAULT_SEO = {
-  title: 'TimeOffly | Gestisci ferie e permessi aziendali senza Excel',
+  title: 'TimeOffly | Gestione ferie e permessi',
   description:
-    'TimeOffly ti aiuta a gestire ferie, permessi e assenze in modo semplice e intuitivo, con una vista chiara sul team.',
+    'Gestisci ferie e permessi in modo semplice e intuitivo con TimeOffly. Calendario condiviso, approvazioni e visione chiara delle assenze del team.',
   robots: 'index, follow',
   canonicalPath: '/',
   ogType: 'website' as const
 };
+const APPLICATION_NAME = 'TimeOffly';
+const STRUCTURED_DATA_SELECTOR = 'script[data-seo-structured-data]';
 
 @Injectable({ providedIn: 'root' })
 export class SeoService {
@@ -44,10 +49,13 @@ export class SeoService {
     const description = seo?.description ?? DEFAULT_SEO.description;
     const robots = seo?.robots ?? DEFAULT_SEO.robots;
     const ogType = seo?.ogType ?? DEFAULT_SEO.ogType;
+    const structuredData = seo?.structuredData ?? null;
     const canonicalUrl = this.buildAbsoluteUrl(seo?.canonicalPath ?? this.router.url ?? DEFAULT_SEO.canonicalPath);
 
     this.title.setTitle(title);
 
+    this.updateNameTag('application-name', APPLICATION_NAME);
+    this.updateNameTag('apple-mobile-web-app-title', APPLICATION_NAME);
     this.updateNameTag('description', description);
     this.updateNameTag('robots', robots);
     this.updateNameTag('twitter:card', 'summary');
@@ -62,6 +70,7 @@ export class SeoService {
     this.updatePropertyTag('og:url', canonicalUrl);
 
     this.updateCanonical(canonicalUrl);
+    this.updateStructuredData(structuredData);
   }
 
   private getDeepestRoute(snapshot: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
@@ -107,6 +116,20 @@ export class SeoService {
     }
 
     canonicalLink.setAttribute('href', url);
+  }
+
+  private updateStructuredData(schema: JsonLdSchema | null) {
+    this.document.querySelectorAll(STRUCTURED_DATA_SELECTOR).forEach(node => node.remove());
+
+    if (!schema) {
+      return;
+    }
+
+    const script = this.document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-seo-structured-data', 'true');
+    script.textContent = JSON.stringify(schema);
+    this.document.head.appendChild(script);
   }
 
   private updateNameTag(name: string, content: string) {

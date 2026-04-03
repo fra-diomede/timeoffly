@@ -1,20 +1,40 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
+import { buildSiteUrl } from './core/config/site.config';
 
 const PRIVATE_ROBOTS = 'noindex, nofollow';
+const BRAND_NAME = 'TimeOffly';
+const HOME_TITLE = 'TimeOffly | Gestione ferie e permessi';
+const HOME_DESCRIPTION =
+  'Gestisci ferie e permessi in modo semplice e intuitivo con TimeOffly. Calendario condiviso, approvazioni e visione chiara delle assenze del team.';
+const HOME_STRUCTURED_DATA = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: BRAND_NAME,
+      url: buildSiteUrl('/')
+    },
+    {
+      '@type': 'Organization',
+      name: BRAND_NAME,
+      url: buildSiteUrl('/')
+    }
+  ]
+} as const;
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    title: 'TimeOffly | Gestisci ferie e permessi aziendali senza Excel',
+    title: HOME_TITLE,
     data: {
       seo: {
-        description:
-          'TimeOffly ti aiuta a gestire ferie, permessi e assenze con calendario condiviso, visibilita sul team e accesso rapido a login e registrazione.',
+        description: HOME_DESCRIPTION,
         robots: 'index, follow',
-        canonicalPath: '/'
+        canonicalPath: '/',
+        structuredData: HOME_STRUCTURED_DATA
       }
     },
     loadComponent: () => import('./pages/landing-page/landing-page.component').then(m => m.LandingPageComponent)
