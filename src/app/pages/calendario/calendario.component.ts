@@ -1,13 +1,15 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
+import { finalize } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { CalendarioService } from '../../core/services/calendario.service';
-import { CalendarioDto } from '../../models/calendario.model';
-import { parseItalianDate, toIsoDate, toItalianDate } from '../../core/utils/date.util';
+import { MatSelectModule } from '@angular/material/select';
+import { HolidayCalendarService } from '../../core/services/holiday-calendar.service';
+import { CountryOption, PublicHoliday } from '../../models/holiday-calendar.model';
+import { toIsoDate, toItalianDate } from '../../core/utils/date.util';
 
 interface DayCell {
   day: number;
@@ -36,7 +38,8 @@ interface MonthCard {
     MatCardModule,
     MatButtonModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatSelectModule
   ],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.scss']
@@ -44,47 +47,121 @@ interface MonthCard {
 export class CalendarioComponent implements OnInit {
   year = new Date().getFullYear();
   country = 'IT';
-  calendario: CalendarioDto[] = [];
+  holidays: PublicHoliday[] = [];
   months: MonthCard[] = [];
+  countryOptions: CountryOption[] = [];
+  countryLabelMap: Record<string, string> = {};
+  countriesLoading = false;
+  calendarLoading = false;
 
   private readonly monthNames = [
     'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
   ];
 
-  constructor(private calendarioService: CalendarioService) {}
+  constructor(private holidayCalendarService: HolidayCalendarService) {}
+
+  get selectedCountryLabel(): string {
+    return this.countryLabelMap[this.country] ?? this.country;
+  }
+
+  get totalHolidays(): number {
+    return this.months.reduce((total, month) => total + month.holidayCount, 0);
+  }
 
   ngOnInit() {
+    this.loadCountries();
     this.load();
   }
 
   load() {
-    const code = (this.country || '').toUpperCase();
-    this.calendarioService.getCalendario(this.year, code || undefined).subscribe(data => {
-      this.calendario = data || [];
-      this.months = this.buildMonths(this.calendario, this.year);
-    });
+    this.year = this.normalizeYear(this.year);
+    this.country = this.normalizeCountryCode(this.country) ?? 'IT';
+    this.calendarLoading = true;
+
+    this.holidayCalendarService
+      .getPublicHolidays(this.year, this.country)
+      .pipe(
+        finalize(() => {
+          this.calendarLoading = false;
+        })
+      )
+      .subscribe(holidays => {
+        this.holidays = holidays ?? [];
+        this.months = this.buildMonths(this.holidays, this.year);
+      });
   }
 
-  private buildMonths(data: CalendarioDto[], year: number): MonthCard[] {
-    const dayMap = new Map<string, CalendarioDto>();
+  onCountryChange(countryCode: string) {
+    this.country = this.normalizeCountryCode(countryCode) ?? this.country;
+    this.load();
+  }
 
-    data.forEach(row => {
-      const date = this.parseDate(row.data);
-      if (!date) return;
-      const iso = toIsoDate(date);
-      dayMap.set(iso, row);
+  private loadCountries() {
+    this.countriesLoading = true;
+
+    this.holidayCalendarService
+      .getCountryOptions()
+      .pipe(
+        finalize(() => {
+          this.countriesLoading = false;
+        })
+      )
+      .subscribe(options => {
+        this.countryOptions = options ?? [];
+        this.countryLabelMap = this.buildCountryLabelMap(this.countryOptions);
+        this.syncSelectedCountry();
+      });
+  }
+
+  private syncSelectedCountry() {
+    if (!this.countryOptions.length) {
+      return;
+    }
+
+    const currentCountry = this.normalizeCountryCode(this.country);
+    if (currentCountry && this.countryLabelMap[currentCountry]) {
+      this.country = currentCountry;
+      return;
+    }
+
+    const fallback = this.countryOptions.find(option => option.value === 'IT') ?? this.countryOptions[0];
+    if (!fallback) {
+      return;
+    }
+
+    this.country = fallback.value;
+    this.load();
+  }
+
+  private buildCountryLabelMap(options: CountryOption[]): Record<string, string> {
+    return options.reduce<Record<string, string>>((map, option) => {
+      map[option.value] = option.label;
+      return map;
+    }, {});
+  }
+
+  private buildMonths(data: PublicHoliday[], year: number): MonthCard[] {
+    const holidayMap = new Map<string, PublicHoliday>();
+
+    data.forEach(holiday => {
+      const isoDate = toIsoDate(holiday.date);
+      if (!isoDate) {
+        return;
+      }
+
+      holidayMap.set(isoDate, holiday);
     });
 
     return this.monthNames.map((monthName, monthIndex) => {
-      const weeks = this.buildWeeks(monthIndex, year, dayMap);
+      const weeks = this.buildWeeks(monthIndex, year, holidayMap);
       const holidays: DayCell[] = [];
       const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
       for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, monthIndex, day);
-        const cell = this.buildDayCell(date, dayMap);
-        if (cell && cell.isHoliday) {
+        const cell = this.buildDayCell(date, holidayMap);
+        if (cell.isHoliday) {
           holidays.push(cell);
         }
       }
@@ -99,7 +176,7 @@ export class CalendarioComponent implements OnInit {
     });
   }
 
-  private buildWeeks(month: number, year: number, dayMap: Map<string, CalendarioDto>): (DayCell | null)[][] {
+  private buildWeeks(month: number, year: number, holidayMap: Map<string, PublicHoliday>): (DayCell | null)[][] {
     const weeks: (DayCell | null)[][] = [];
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     let week: (DayCell | null)[] = [];
@@ -113,7 +190,7 @@ export class CalendarioComponent implements OnInit {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      week.push(this.buildDayCell(date, dayMap));
+      week.push(this.buildDayCell(date, holidayMap));
       if (week.length === 7) {
         weeks.push(week);
         week = [];
@@ -130,12 +207,12 @@ export class CalendarioComponent implements OnInit {
     return weeks;
   }
 
-  private buildDayCell(date: Date, dayMap: Map<string, CalendarioDto>): DayCell {
-    const iso = toIsoDate(date);
-    const row = dayMap.get(iso);
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6 || row?.sunday === true;
-    const isHoliday = !!row?.festivo || row?.officialFestivo === true;
-    const label = row?.festivo?.localName || row?.festivo?.name || (row?.officialFestivo ? 'Festivo' : '');
+  private buildDayCell(date: Date, holidayMap: Map<string, PublicHoliday>): DayCell {
+    const isoDate = toIsoDate(date);
+    const holiday = holidayMap.get(isoDate);
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const isHoliday = !!holiday;
+    const label = holiday?.localName || holiday?.name || '';
 
     return {
       day: date.getDate(),
@@ -143,15 +220,25 @@ export class CalendarioComponent implements OnInit {
       dateLabel: toItalianDate(date),
       isWeekend,
       isHoliday,
-      isOfficial: row?.officialFestivo === true,
+      isOfficial: holiday?.global === true,
       label
     };
   }
 
-  private parseDate(value: string): Date | null {
-    const parsed = parseItalianDate(value);
-    if (parsed) return parsed;
-    const raw = new Date(value);
-    return Number.isNaN(raw.getTime()) ? null : raw;
+  private normalizeCountryCode(value: unknown): string | null {
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const normalized = value.trim().toUpperCase();
+    return normalized ? normalized : null;
+  }
+
+  private normalizeYear(value: unknown): number {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return new Date().getFullYear();
+    }
+
+    return Math.max(1970, Math.trunc(value));
   }
 }

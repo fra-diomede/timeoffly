@@ -6,7 +6,7 @@ import {
   HttpEvent
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { isAuthRequest } from './auth-request.util';
+import { isAuthRequest, isBackendApiRequest } from './auth-request.util';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    if (isAuthRequest(req.url)) {
+    if (!isBackendApiRequest(req.url) || isAuthRequest(req.url)) {
       return next.handle(req);
     }
 

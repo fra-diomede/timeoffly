@@ -7,6 +7,11 @@
   margin-bottom: 0;
 }
 
+.page-title-group {
+  display: grid;
+  gap: 4px;
+}
+
 .page-subtitle {
   font-size: 14px;
   color: var(--text-soft);
@@ -22,8 +27,30 @@
 .filters {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
+}
+
+.filter-field {
+  flex: 1 1 180px;
+}
+
+.year-field {
+  max-width: 148px;
+}
+
+.country-field {
+  min-width: 260px;
+  max-width: 360px;
+}
+
+.filters button {
+  min-width: 132px;
+  height: 56px;
+}
+
+.country-metric span {
+  max-width: 18ch;
 }
 
 .month-grid {
@@ -42,6 +69,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 16px 18px 10px;
   border-bottom: 1px solid rgba(15, 81, 174, 0.08);
 }
@@ -168,4 +196,18 @@
   padding: 12px 18px 16px;
   color: var(--text-muted);
   font-size: 12px;
+}
+
+@media (max-width: 960px) {
+  .filters {
+    align-items: stretch;
+  }
+
+  .filter-field,
+  .year-field,
+  .country-field,
+  .filters button {
+    width: 100%;
+    max-width: none;
+  }
 }

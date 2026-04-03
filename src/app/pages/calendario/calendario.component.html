@@ -4,7 +4,7 @@
       <span class="page-hero-eyebrow">Festivita' annuali</span>
       <h1 class="page-hero-title">Calendario annuale</h1>
       <p class="page-hero-subtitle">
-        Visualizza festivita', weekend e mesi chiave con una lettura piu' ordinata, pensata per pianificare assenze e ponti con piu' anticipo.
+        Seleziona anno e nazione per caricare i giorni festivi supportati da Nager.Date, con una vista mensile ordinata e coerente con il resto di TimeOffly.
       </p>
 
       <div class="page-hero-metrics">
@@ -12,13 +12,13 @@
           <strong>{{ year }}</strong>
           <span>anno in vista</span>
         </div>
-        <div class="page-hero-metric">
-          <strong>{{ country.toUpperCase() }}</strong>
-          <span>country attiva</span>
+        <div class="page-hero-metric country-metric">
+          <strong>{{ country }}</strong>
+          <span>{{ selectedCountryLabel }}</span>
         </div>
         <div class="page-hero-metric">
-          <strong>{{ months.length }}</strong>
-          <span>mesi renderizzati</span>
+          <strong>{{ totalHolidays }}</strong>
+          <span>festivi caricati</span>
         </div>
       </div>
     </div>
@@ -47,18 +47,35 @@
   <div class="page-header calendario-header">
     <div class="page-title-group">
       <h2 class="section-title">Vista mensile</h2>
-      <div class="page-subtitle">Festivi ufficiali e panoramica per mese.</div>
+      <div class="page-subtitle">Scegli anno e nazione per aggiornare il calendario dei festivi ufficiali.</div>
     </div>
+
     <div class="filters">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="filter-field year-field">
         <mat-label>Anno</mat-label>
-        <input matInput type="number" [(ngModel)]="year">
+        <input matInput type="number" min="1970" [(ngModel)]="year" (keyup.enter)="load()">
       </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Country</mat-label>
-        <input matInput [(ngModel)]="country" maxlength="2">
+
+      <mat-form-field appearance="outline" class="filter-field country-field">
+        <mat-label>Nazione</mat-label>
+        <mat-select
+          [(ngModel)]="country"
+          [disabled]="countriesLoading || !countryOptions.length"
+          (selectionChange)="onCountryChange($event.value)">
+          <mat-option *ngIf="!countryOptions.length" [value]="country" disabled>
+            {{ countriesLoading ? 'Caricamento nazioni...' : 'Nessuna nazione disponibile' }}
+          </mat-option>
+          <mat-option *ngFor="let option of countryOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="countryOptions.length">{{ selectedCountryLabel }}</mat-hint>
+        <mat-hint *ngIf="!countriesLoading && !countryOptions.length">Elenco paesi temporaneamente non disponibile.</mat-hint>
       </mat-form-field>
-      <button mat-raised-button color="primary" (click)="load()">Carica</button>
+
+      <button mat-raised-button color="primary" (click)="load()" [disabled]="calendarLoading">
+        {{ calendarLoading ? 'Aggiornamento...' : 'Carica' }}
+      </button>
     </div>
   </div>
 

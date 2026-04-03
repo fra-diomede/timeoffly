@@ -8,7 +8,7 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { isAuthRequest } from './auth-request.util';
+import { isAuthRequest, isBackendApiRequest } from './auth-request.util';
 import { AuthService } from '../services/auth.service';
 import { RefreshTokenService } from '../services/refresh-token.service';
 
@@ -22,7 +22,12 @@ export class RefreshInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(req).pipe(
       catchError((error: unknown) => {
-        if (!(error instanceof HttpErrorResponse) || error.status !== 401 || isAuthRequest(req.url)) {
+        if (
+          !isBackendApiRequest(req.url) ||
+          !(error instanceof HttpErrorResponse) ||
+          error.status !== 401 ||
+          isAuthRequest(req.url)
+        ) {
           return throwError(() => error);
         }
 
