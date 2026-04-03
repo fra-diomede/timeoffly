@@ -42,7 +42,7 @@ export class AuthService {
     const context = new HttpContext().set(SKIP_GLOBAL_HTTP_ERROR_HANDLING, true);
 
     return this.http.post<AuthResponse>(`${this.baseUrl}/auth/refresh`, payload, { context }).pipe(
-      map(resp => this.applyAuthResponse(resp, true)),
+      map(resp => this.applyAuthResponse(resp, { mergeWithCurrent: true })),
       tap(session => this.setSession(session))
     );
   }
@@ -64,7 +64,12 @@ export class AuthService {
       return;
     }
 
-    void this.router.navigate(['/auth/login'], { replaceUrl: true });
+    void this.router.navigate(['/auth/login'], {
+      replaceUrl: true,
+      queryParams: {
+        redirectTo: this.resolvePostAuthUrl(this.router.url)
+      }
+    });
   }
 
   handleUnauthorized() {
@@ -93,6 +98,15 @@ export class AuthService {
     return roles.some(role => currentRoles.includes(role) || currentRoles.includes(`ROLE_${role}`));
   }
 
+  resolvePostAuthUrl(candidate?: string | null, fallback = '/dashboard'): string {
+    const normalizedCandidate = this.normalizeString(candidate);
+    if (!normalizedCandidate || !normalizedCandidate.startsWith('/') || normalizedCandidate.startsWith('/auth/')) {
+      return fallback;
+    }
+
+    return normalizedCandidate;
+  }
+
   clearSession() {
     this.sessionSubject.next(null);
     this.storage.clear();
@@ -103,24 +117,33 @@ export class AuthService {
     this.storage.setSession(session);
   }
 
-  private applyAuthResponse(resp: AuthResponse, allowPartial = false): AuthSession {
-    const current = this.sessionSubject.value;
-    const accessToken = resp.accessToken ?? current?.accessToken ?? '';
-    const refreshToken = resp.refreshToken ?? current?.refreshToken ?? '';
+  private applyAuthResponse(resp: AuthResponse, options?: { mergeWithCurrent?: boolean }): AuthSession {
+    const current = options?.mergeWithCurrent ? this.sessionSubject.value : null;
+    const accessToken = this.normalizeString(resp.accessToken) ?? current?.accessToken ?? null;
+    const refreshToken = this.normalizeString(resp.refreshToken) ?? current?.refreshToken ?? null;
 
-    if (!allowPartial && (!accessToken || !refreshToken)) {
-      throw new Error('Token non valido');
+    if (!accessToken) {
+      throw new Error('Risposta di autenticazione non valida: access token mancante');
     }
 
     return {
-      tokenType: resp.tokenType ?? current?.tokenType ?? 'Bearer',
+      tokenType: this.normalizeString(resp.tokenType) ?? current?.tokenType ?? 'Bearer',
       accessToken,
       refreshToken,
-      expiresAt: resp.expiresAt ?? current?.expiresAt ?? null,
-      username: resp.username ?? current?.username ?? '',
-      nome: resp.nome ?? current?.nome ?? null,
-      cognome: resp.cognome ?? current?.cognome ?? null,
-      ruoli: resp.ruoli ?? current?.ruoli ?? []
+      expiresAt: this.normalizeString(resp.expiresAt) ?? current?.expiresAt ?? null,
+      username: this.normalizeString(resp.username) ?? current?.username ?? '',
+      nome: this.normalizeString(resp.nome) ?? current?.nome ?? null,
+      cognome: this.normalizeString(resp.cognome) ?? current?.cognome ?? null,
+      ruoli: Array.isArray(resp.ruoli) ? resp.ruoli : current?.ruoli ?? []
     };
+  }
+
+  private normalizeString(value: string | null | undefined): string | null {
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const trimmedValue = value.trim();
+    return trimmedValue ? trimmedValue : null;
   }
 }

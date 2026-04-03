@@ -33,7 +33,7 @@ export interface RefreshRequest {
 export interface AuthSession {
   tokenType: string;
   accessToken: string;
-  refreshToken: string;
+  refreshToken: string | null;
   expiresAt: string | null;
   username: string;
   nome?: string | null;

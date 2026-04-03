@@ -1,7 +1,7 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,7 +38,8 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private notifications: NotificationService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.form = this.fb.group({
       username: ['', Validators.required],
@@ -48,7 +49,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      void this.navigateAfterLogin();
     }
   }
 
@@ -66,8 +67,13 @@ export class LoginComponent implements OnInit {
       .subscribe({
         next: () => {
           this.notifications.success('Accesso effettuato con successo');
-          void this.router.navigate(['/dashboard']);
+          void this.navigateAfterLogin();
         }
       });
+  }
+
+  private navigateAfterLogin() {
+    const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
+    return this.router.navigateByUrl(this.authService.resolvePostAuthUrl(redirectTo), { replaceUrl: true });
   }
 }

@@ -1,0 +1,27 @@
+<section class="notification-banner-shell" *ngIf="banner$ | async as banner">
+  <div
+    class="notification-banner"
+    [class.is-error]="banner.level === 'error'"
+    aria-live="assertive"
+    role="alert">
+    <div class="notification-banner__main">
+      <div class="notification-banner__icon" aria-hidden="true">
+        <mat-icon>error</mat-icon>
+      </div>
+
+      <div class="notification-banner__copy">
+        <div class="notification-banner__eyebrow">Errore</div>
+        <p class="notification-banner__message">{{ banner.message }}</p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      mat-stroked-button
+      class="notification-banner__dismiss"
+      (click)="dismiss()"
+      aria-label="Chiudi messaggio di errore">
+      Chiudi
+    </button>
+  </div>
+</section>

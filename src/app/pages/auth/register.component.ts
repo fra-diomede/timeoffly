@@ -77,7 +77,7 @@ export class RegisterComponent {
       .subscribe({
         next: () => {
           this.notifications.success('Registrazione completata. Ora puoi accedere.');
-          void this.router.navigate(['/auth/login']);
+          void this.router.navigate(['/auth/login'], { replaceUrl: true });
         }
       });
   }

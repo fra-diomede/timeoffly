@@ -1,0 +1,111 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.notification-banner-shell {
+  width: 100%;
+  padding: 16px 20px 0;
+  animation: bannerFadeIn 0.22s ease-out;
+}
+
+.notification-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(180, 35, 24, 0.2);
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 28%),
+    linear-gradient(135deg, rgba(180, 35, 24, 0.1), rgba(255, 236, 236, 0.96));
+  box-shadow: 0 20px 42px rgba(180, 35, 24, 0.12);
+}
+
+.notification-banner__main {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+}
+
+.notification-banner__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  background: rgba(180, 35, 24, 0.12);
+  color: #9f1d17;
+}
+
+.notification-banner__copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.notification-banner__eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9f1d17;
+}
+
+.notification-banner__message {
+  margin: 0;
+  color: #7a271a;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.notification-banner__dismiss.mat-mdc-outlined-button:not(:disabled) {
+  flex: 0 0 auto;
+  align-self: center;
+  border-color: rgba(180, 35, 24, 0.2) !important;
+  background: rgba(255, 255, 255, 0.74);
+  color: #7a271a !important;
+}
+
+.notification-banner__dismiss.mat-mdc-outlined-button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 24px rgba(180, 35, 24, 0.12);
+}
+
+@keyframes bannerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 960px) {
+  .notification-banner-shell {
+    padding: 12px 16px 0;
+  }
+
+  .notification-banner {
+    padding: 16px;
+    border-radius: 20px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notification-banner__dismiss.mat-mdc-outlined-button:not(:disabled) {
+    width: 100%;
+    justify-content: center;
+  }
+}

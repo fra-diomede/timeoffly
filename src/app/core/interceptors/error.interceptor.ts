@@ -14,6 +14,13 @@ import { NotificationService } from '../services/notification.service';
 
 const AUTHENTICATION_ERROR_MESSAGE = 'Problema di autenticazione, rieseguire il login';
 const DEFAULT_SERVER_ERROR_MESSAGE = 'Errore nel server, riprovare pi\u00F9 tardi';
+const GENERIC_HTTP_MESSAGES = new Set([
+  'unauthorized',
+  'bad request',
+  'forbidden',
+  'internal server error',
+  'unknown error'
+]);
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
@@ -46,18 +53,24 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private resolveMessage(error: HttpErrorResponse): string {
+    const backendMessage = this.extractMessage(error);
+
     if (error.status === 401) {
-      return AUTHENTICATION_ERROR_MESSAGE;
+      return backendMessage ?? AUTHENTICATION_ERROR_MESSAGE;
     }
 
     if (error.status === 400 || error.status === 500) {
-      return this.extractBackendMessage(error.error) ?? DEFAULT_SERVER_ERROR_MESSAGE;
+      return backendMessage ?? DEFAULT_SERVER_ERROR_MESSAGE;
     }
 
     return DEFAULT_SERVER_ERROR_MESSAGE;
   }
 
-  private extractBackendMessage(payload: unknown, depth = 0): string | null {
+  private extractMessage(error: HttpErrorResponse): string | null {
+    return this.extractPayloadMessage(error.error) ?? this.normalizeMessage(error.message);
+  }
+
+  private extractPayloadMessage(payload: unknown, depth = 0): string | null {
     if (payload == null || depth > 4) {
       return null;
     }
@@ -68,7 +81,7 @@ export class ErrorInterceptor implements HttpInterceptor {
 
     if (Array.isArray(payload)) {
       for (const item of payload) {
-        const message = this.extractBackendMessage(item, depth + 1);
+        const message = this.extractPayloadMessage(item, depth + 1);
         if (message) {
           return message;
         }
@@ -83,8 +96,8 @@ export class ErrorInterceptor implements HttpInterceptor {
 
     const record = payload as Record<string, unknown>;
 
-    for (const key of ['message', 'error', 'detail', 'title'] as const) {
-      const message = this.extractBackendMessage(record[key], depth + 1);
+    for (const key of ['message', 'detail', 'error_description', 'description', 'title', 'error'] as const) {
+      const message = this.extractPayloadMessage(record[key], depth + 1);
       if (message) {
         return message;
       }
@@ -94,7 +107,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (errors && typeof errors === 'object') {
       const values = Array.isArray(errors) ? errors : Object.values(errors as Record<string, unknown>);
       for (const value of values) {
-        const message = this.extractBackendMessage(value, depth + 1);
+        const message = this.extractPayloadMessage(value, depth + 1);
         if (message) {
           return message;
         }
@@ -110,7 +123,16 @@ export class ErrorInterceptor implements HttpInterceptor {
     }
 
     const normalized = value.trim();
-    return normalized ? normalized : null;
+    if (!normalized) {
+      return null;
+    }
+
+    const lowered = normalized.toLowerCase();
+    if (GENERIC_HTTP_MESSAGES.has(lowered) || lowered.startsWith('http failure response for')) {
+      return null;
+    }
+
+    return normalized;
   }
 
   private toHttpErrorResponse(error: unknown, req: HttpRequest<unknown>): HttpErrorResponse {
