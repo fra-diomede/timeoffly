@@ -12,11 +12,11 @@ interface SeoRouteData {
 }
 
 const DEFAULT_SEO = {
-  title: 'TimeOffly | Gestione ferie, permessi e approvazioni',
+  title: 'TimeOffly | Gestisci ferie e permessi aziendali senza Excel',
   description:
-    'TimeOffly semplifica la gestione di ferie, permessi e approvazioni per dipendenti, manager e amministratori.',
+    'TimeOffly ti aiuta a gestire ferie, permessi e assenze in modo semplice e intuitivo, con una vista chiara sul team.',
   robots: 'index, follow',
-  canonicalPath: '/auth/login',
+  canonicalPath: '/',
   ogType: 'website' as const
 };
 

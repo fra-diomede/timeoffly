@@ -1,0 +1,28 @@
+<main class="legal-page">
+  <div class="legal-shell">
+    <header class="legal-topbar">
+      <a routerLink="/" aria-label="Torna alla home TimeOffly">
+        <app-brand-lockup variant="lockup" size="sm" [showTagline]="false"></app-brand-lockup>
+      </a>
+
+      <div class="legal-actions">
+        <a mat-stroked-button routerLink="/">Home</a>
+        <a mat-raised-button color="primary" routerLink="/auth/register">Crea il tuo account</a>
+      </div>
+    </header>
+
+    <section class="legal-hero">
+      <span class="legal-eyebrow">{{ page.eyebrow }}</span>
+      <h1>{{ page.heading }}</h1>
+      <p>{{ page.summary }}</p>
+      <span class="legal-updated">{{ page.lastUpdated }}</span>
+    </section>
+
+    <section class="legal-content">
+      <article class="legal-card" *ngFor="let section of page.sections">
+        <h2>{{ section.title }}</h2>
+        <p *ngFor="let paragraph of section.paragraphs">{{ paragraph }}</p>
+      </article>
+    </section>
+  </div>
+</main>

@@ -1,6 +1,9 @@
 User-agent: *
+Allow: /
 Allow: /auth/login
 Allow: /auth/register
+Allow: /privacy
+Allow: /terms
 Disallow: /dashboard
 Disallow: /ferie
 Disallow: /calendario

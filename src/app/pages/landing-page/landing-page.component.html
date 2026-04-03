@@ -1,0 +1,181 @@
+<main class="landing-page">
+  <div class="landing-shell">
+    <header class="landing-topbar">
+      <a class="brand-link" routerLink="/" aria-label="TimeOffly home">
+        <app-brand-lockup variant="lockup" size="sm" [showTagline]="false"></app-brand-lockup>
+      </a>
+
+      <nav class="landing-nav" aria-label="Sezioni principali">
+        <a href="#problema">Problema</a>
+        <a href="#soluzione">Soluzione</a>
+        <a href="#funzionalita">Funzionalita</a>
+      </nav>
+
+      <div class="landing-topbar-actions">
+        <a mat-stroked-button routerLink="/auth/login">Accedi</a>
+        <a mat-raised-button color="primary" routerLink="/auth/register">Inizia ora</a>
+      </div>
+    </header>
+
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <span class="hero-eyebrow">Gestione assenze per team e aziende</span>
+        <h1 id="hero-title">Gestisci ferie e permessi aziendali senza Excel</h1>
+        <p class="hero-subtitle">
+          TimeOffly ti aiuta a gestire ferie, permessi e assenze in modo semplice e intuitivo.
+        </p>
+
+        <div class="hero-actions">
+          <a mat-raised-button color="primary" routerLink="/auth/register">Inizia ora</a>
+          <a mat-stroked-button routerLink="/auth/login">Accedi</a>
+        </div>
+
+        <ul class="hero-highlights">
+          <li *ngFor="let item of heroHighlights">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <span>{{ item }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <aside class="hero-preview" aria-label="Anteprima del prodotto">
+        <div class="preview-header">
+          <span class="preview-chip">Vista operativa</span>
+          <span class="preview-chip preview-chip--success">Disponibilita aggiornata</span>
+        </div>
+
+        <div class="preview-card preview-card--calendar">
+          <div class="preview-card-head">
+            <div>
+              <strong>Calendario team</strong>
+              <span>Aprile 2026</span>
+            </div>
+            <mat-icon aria-hidden="true">calendar_month</mat-icon>
+          </div>
+
+          <div class="calendar-grid" aria-hidden="true">
+            <span></span>
+            <span class="is-active"></span>
+            <span></span>
+            <span class="is-success"></span>
+            <span></span>
+            <span></span>
+            <span class="is-active"></span>
+            <span></span>
+            <span></span>
+            <span class="is-success"></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div class="preview-metrics">
+          <div class="preview-card">
+            <span class="metric-label">Richieste da valutare</span>
+            <strong>4</strong>
+          </div>
+
+          <div class="preview-card">
+            <span class="metric-label">Assenze pianificate</span>
+            <strong>Calendario condiviso</strong>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="problema" class="content-section" aria-labelledby="problem-title">
+      <div class="section-heading">
+        <span class="section-eyebrow">Il problema</span>
+        <h2 id="problem-title">Quando ferie e permessi vivono in file separati, il lavoro si complica</h2>
+        <p>
+          Processi sparsi e aggiornamenti manuali rendono piu difficile coordinare il team e prendere decisioni con serenita.
+        </p>
+      </div>
+
+      <div class="card-grid card-grid--three">
+        <article class="info-card" *ngFor="let problem of problems">
+          <div class="info-card-icon">
+            <mat-icon aria-hidden="true">{{ problem.icon }}</mat-icon>
+          </div>
+          <h3>{{ problem.title }}</h3>
+          <p>{{ problem.description }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="soluzione" class="content-section content-section--split" aria-labelledby="solution-title">
+      <div class="section-heading section-heading--compact">
+        <span class="section-eyebrow">La soluzione</span>
+        <h2 id="solution-title">TimeOffly riunisce richieste, calendario e visibilita del team in un unico flusso</h2>
+        <p>
+          La piattaforma organizza la gestione delle assenze in una struttura chiara, utile per chi richiede, approva e pianifica.
+        </p>
+      </div>
+
+      <div class="solution-stack">
+        <article class="solution-card" *ngFor="let solution of solutions">
+          <div class="solution-card-head">
+            <div class="info-card-icon">
+              <mat-icon aria-hidden="true">{{ solution.icon }}</mat-icon>
+            </div>
+            <h3>{{ solution.title }}</h3>
+          </div>
+          <p>{{ solution.description }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="funzionalita" class="content-section" aria-labelledby="features-title">
+      <div class="section-heading">
+        <span class="section-eyebrow">Funzionalita</span>
+        <h2 id="features-title">Le funzioni principali per rendere piu leggibile la gestione delle assenze</h2>
+        <p>
+          Ogni sezione e pensata per dare piu contesto alle persone giuste, senza complicare l'esperienza quotidiana.
+        </p>
+      </div>
+
+      <div class="card-grid card-grid--three">
+        <article class="feature-card" *ngFor="let feature of features">
+          <div class="feature-card-head">
+            <div class="info-card-icon">
+              <mat-icon aria-hidden="true">{{ feature.icon }}</mat-icon>
+            </div>
+            <h3>{{ feature.title }}</h3>
+          </div>
+          <p>{{ feature.description }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="cta-section" aria-labelledby="cta-title">
+      <div class="cta-card">
+        <div>
+          <span class="section-eyebrow section-eyebrow--light">Call to action</span>
+          <h2 id="cta-title">Inizia oggi a semplificare la gestione delle ferie</h2>
+          <p>
+            Centralizza richieste, disponibilita e panoramica del team in un'unica esperienza piu ordinata.
+          </p>
+        </div>
+
+        <a mat-raised-button color="primary" routerLink="/auth/register">Crea il tuo account</a>
+      </div>
+    </section>
+
+    <footer class="landing-footer">
+      <div class="footer-brand">
+        <app-brand-lockup variant="lockup" size="sm" [showTagline]="false"></app-brand-lockup>
+        <p>Strumento web per organizzare ferie, permessi e assenze con una vista piu chiara per tutto il team.</p>
+      </div>
+
+      <div class="footer-meta">
+        <nav class="footer-links" aria-label="Link legali">
+          <a routerLink="/privacy">Privacy Policy</a>
+          <a routerLink="/terms">Termini di Servizio</a>
+          <a href="mailto:hello@timeoffly.com">hello&#64;timeoffly.com</a>
+        </nav>
+
+        <p class="footer-copy">&copy; 2026 TimeOffly. Tutti i diritti riservati.</p>
+      </div>
+    </footer>
+  </div>
+</main>

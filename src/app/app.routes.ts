@@ -6,6 +6,20 @@ const PRIVATE_ROBOTS = 'noindex, nofollow';
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    title: 'TimeOffly | Gestisci ferie e permessi aziendali senza Excel',
+    data: {
+      seo: {
+        description:
+          'TimeOffly ti aiuta a gestire ferie, permessi e assenze con calendario condiviso, visibilita sul team e accesso rapido a login e registrazione.',
+        robots: 'index, follow',
+        canonicalPath: '/'
+      }
+    },
+    loadComponent: () => import('./pages/landing-page/landing-page.component').then(m => m.LandingPageComponent)
+  },
+  {
     path: 'auth',
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -36,6 +50,32 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/auth/register.component').then(m => m.RegisterComponent)
       }
     ]
+  },
+  {
+    path: 'privacy',
+    title: 'Privacy Policy | TimeOffly',
+    data: {
+      documentKey: 'privacy',
+      seo: {
+        description: 'Informativa privacy placeholder di TimeOffly, da completare e validare prima della pubblicazione definitiva.',
+        robots: 'noindex, follow',
+        canonicalPath: '/privacy'
+      }
+    },
+    loadComponent: () => import('./pages/legal-page/legal-page.component').then(m => m.LegalPageComponent)
+  },
+  {
+    path: 'terms',
+    title: 'Termini di Servizio | TimeOffly',
+    data: {
+      documentKey: 'terms',
+      seo: {
+        description: 'Termini di servizio placeholder di TimeOffly, da completare e validare prima della pubblicazione definitiva.',
+        robots: 'noindex, follow',
+        canonicalPath: '/terms'
+      }
+    },
+    loadComponent: () => import('./pages/legal-page/legal-page.component').then(m => m.LegalPageComponent)
   },
   {
     path: '',
@@ -135,5 +175,5 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: '' }
 ];
