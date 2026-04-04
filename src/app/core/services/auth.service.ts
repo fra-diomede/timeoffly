@@ -32,8 +32,10 @@ export class AuthService {
     );
   }
 
-  register(req: RegisterRequest): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/auth/register`, req);
+  register(req: RegisterRequest, options?: { context?: HttpContext }): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/auth/register`, req, {
+      context: options?.context
+    });
   }
 
   refresh(): Observable<AuthSession> {

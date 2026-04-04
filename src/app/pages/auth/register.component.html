@@ -1,111 +1,624 @@
-<div class="auth-shell">
-  <div class="auth-panel">
+<div class="register-shell">
+  <div class="register-main">
     <div class="brand">
       <app-brand-lockup variant="logo" size="lg"></app-brand-lockup>
     </div>
 
-    <mat-card>
-      <span class="eyebrow">Nuovo account</span>
-      <mat-card-title>Crea il tuo profilo</mat-card-title>
-      <mat-card-subtitle>Inizia a gestire ferie e permessi con una UI piu' chiara e ordinata.</mat-card-subtitle>
+    <mat-card class="wizard-card">
+      <div class="wizard-header">
+        <div class="wizard-progress-copy">
+          <span class="eyebrow">Step {{ currentStepNumber }} di {{ totalSteps }}</span>
+          <span class="progress-helper">Registrazione guidata, con submit solo al riepilogo finale.</span>
+        </div>
 
-      <form [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field appearance="outline">
-          <mat-label>Nome</mat-label>
-          <input matInput formControlName="nome" autocomplete="given-name">
-          <mat-error *ngIf="shouldShowError('nome')">{{ getErrorMessage('nome') }}</mat-error>
-        </mat-form-field>
+        <mat-progress-bar mode="determinate" [value]="progressValue"></mat-progress-bar>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Cognome</mat-label>
-          <input matInput formControlName="cognome" autocomplete="family-name">
-          <mat-error *ngIf="shouldShowError('cognome')">{{ getErrorMessage('cognome') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Username</mat-label>
-          <input matInput formControlName="username" autocomplete="username">
-          <mat-error *ngIf="shouldShowError('username')">{{ getErrorMessage('username') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" autocomplete="email">
-          <mat-error *ngIf="shouldShowError('email')">{{ getErrorMessage('email') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Contratto</mat-label>
-          <input matInput formControlName="contratto" placeholder="Es. Metalmeccanico">
-          <mat-error *ngIf="shouldShowError('contratto')">{{ getErrorMessage('contratto') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Ferie annue</mat-label>
-          <input matInput type="number" min="0" step="1" inputmode="numeric" formControlName="giorniTotali" placeholder="Es. 26">
-          <mat-error *ngIf="shouldShowError('giorniTotali')">{{ getErrorMessage('giorniTotali') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Ore permessi annue</mat-label>
-          <input matInput type="number" min="0" step="1" inputmode="numeric" formControlName="oreTotali" placeholder="Es. 32">
-          <mat-error *ngIf="shouldShowError('oreTotali')">{{ getErrorMessage('oreTotali') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Password</mat-label>
-          <input matInput type="password" formControlName="password" autocomplete="new-password">
-          <mat-error *ngIf="shouldShowError('password')">{{ getErrorMessage('password') }}</mat-error>
-        </mat-form-field>
-
-        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
-          {{ loading ? 'Registrazione...' : 'Registrati' }}
-        </button>
-      </form>
-
-      <div class="auth-footer">
-        <span>Hai gia' un account?</span>
-        <a routerLink="/auth/login" queryParamsHandling="preserve">Accedi</a>
+        <nav class="wizard-stepper" aria-label="Avanzamento registrazione">
+          <button
+            *ngFor="let step of wizardSteps; let index = index"
+            type="button"
+            class="wizard-step"
+            [class.is-active]="index === currentStepIndex"
+            [class.is-completed]="index < currentStepIndex"
+            [class.is-upcoming]="index > currentStepIndex"
+            [disabled]="index > currentStepIndex"
+            [attr.aria-current]="index === currentStepIndex ? 'step' : null"
+            (click)="goToStep(index)"
+          >
+            <span class="wizard-step-index">{{ index < currentStepIndex ? 'OK' : index + 1 }}</span>
+            <span class="wizard-step-copy">
+              <span class="wizard-step-label">{{ step.label }}</span>
+              <span class="wizard-step-status">{{ getStepStateLabel(index) }}</span>
+            </span>
+          </button>
+        </nav>
       </div>
+
+      <form [formGroup]="form" (ngSubmit)="onPrimaryAction()" novalidate>
+        <div class="wizard-body">
+          <div class="wizard-copy">
+            <span class="section-kicker">{{ currentStep.label }}</span>
+            <h1>{{ currentStep.title }}</h1>
+            <p>{{ currentStep.subtitle }}</p>
+          </div>
+
+          <div class="inline-alert inline-alert-error" *ngIf="submitErrorMessage" aria-live="polite">
+            {{ submitErrorMessage }}
+          </div>
+
+          <div class="step-content" [ngSwitch]="currentStep.id">
+            <div *ngSwitchCase="'account'" class="step-stack">
+              <div class="field-grid field-grid-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nome</mat-label>
+                  <input matInput formControlName="nome" autocomplete="given-name">
+                  <mat-error *ngIf="shouldShowError('nome')">{{ getErrorMessage('nome') }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Cognome</mat-label>
+                  <input matInput formControlName="cognome" autocomplete="family-name">
+                  <mat-error *ngIf="shouldShowError('cognome')">{{ getErrorMessage('cognome') }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Username</mat-label>
+                  <input matInput formControlName="username" autocomplete="username">
+                  <mat-hint>Sara' il riferimento con cui ti riconosciamo in piattaforma.</mat-hint>
+                  <mat-error *ngIf="shouldShowError('username')">{{ getErrorMessage('username') }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput formControlName="email" autocomplete="email">
+                  <mat-hint>La useremo per accesso, notifiche e recupero credenziali.</mat-hint>
+                  <mat-error *ngIf="shouldShowError('email')">{{ getErrorMessage('email') }}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" formControlName="password" autocomplete="new-password">
+                <mat-hint>Ti consigliamo una password facile da ricordare e difficile da indovinare.</mat-hint>
+                <mat-error *ngIf="shouldShowError('password')">{{ getErrorMessage('password') }}</mat-error>
+              </mat-form-field>
+
+              <div class="inline-alert inline-alert-info">
+                Inseriamo solo le informazioni necessarie per creare il profilo. Nessun invio parte prima dell'ultimo step.
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'contract'" class="step-stack">
+              <section class="step-section">
+                <div class="section-heading">
+                  <h2>Seleziona il contratto di riferimento</h2>
+                  <p>Scegli il contratto piu' vicino al tuo caso. TimeOffly ti mostrera' sempre se il dato e' verificato o ancora provvisorio.</p>
+                </div>
+
+                <div class="choice-grid contract-grid">
+                  <button
+                    *ngFor="let contract of contractOptions"
+                    type="button"
+                    class="choice-card"
+                    [class.is-selected]="form.controls.contractCode.value === contract.code"
+                    [attr.aria-pressed]="form.controls.contractCode.value === contract.code"
+                    (click)="selectContract(contract.code)"
+                  >
+                    <span class="choice-chip">{{ getContractCardLabel(contract) }}</span>
+                    <span class="choice-title">{{ contract.label }}</span>
+                    <div class="choice-meta-group">
+                      <span class="choice-meta">{{ getContractWorkingPattern(contract) }}</span>
+                      <span class="choice-meta">{{ getContractAllowancePreview(contract) }}</span>
+                    </div>
+                    <span class="choice-description">{{ getContractCardNote(contract) }}</span>
+                  </button>
+                </div>
+
+                <p class="field-error" *ngIf="shouldShowError('contractCode')">{{ getErrorMessage('contractCode') }}</p>
+              </section>
+
+              <div class="field-grid" *ngIf="isCustomContractSelected">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nome contratto personalizzato</mat-label>
+                  <input matInput formControlName="customContractName" placeholder="Es. Contratto quadro interno">
+                  <mat-hint>Usalo se il tuo contratto non compare nell'elenco. Potrai rivederlo prima del salvataggio.</mat-hint>
+                  <mat-error *ngIf="shouldShowError('customContractName')">
+                    {{ getErrorMessage('customContractName') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <section class="step-section">
+                <div class="section-heading">
+                  <h2>Quanti giorni lavori in media a settimana?</h2>
+                  <p>La usiamo per contestualizzare la proposta. Per ora non applichiamo variazioni automatiche non validate.</p>
+                </div>
+
+                <div class="choice-grid workdays-grid">
+                  <button
+                    *ngFor="let option of workingDaysOptions"
+                    type="button"
+                    class="choice-card compact"
+                    [class.is-selected]="form.controls.workingDaysPreset.value === option.code"
+                    [attr.aria-pressed]="form.controls.workingDaysPreset.value === option.code"
+                    (click)="selectWorkingDays(option.code)"
+                  >
+                    <span class="choice-title">{{ option.label }}</span>
+                    <span class="choice-description">{{ option.description }}</span>
+                  </button>
+                </div>
+
+                <p class="field-error" *ngIf="shouldShowError('workingDaysPreset')">
+                  {{ getErrorMessage('workingDaysPreset') }}
+                </p>
+              </section>
+
+              <div class="field-grid field-grid-compact" *ngIf="isCustomWorkingDaysSelected">
+                <mat-form-field appearance="outline">
+                  <mat-label>Giorni lavorativi settimanali</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    min="1"
+                    max="7"
+                    step="1"
+                    inputmode="numeric"
+                    formControlName="workingDaysCustom"
+                    placeholder="Es. 4"
+                  >
+                  <mat-hint>Inserisci un valore compreso tra 1 e 7.</mat-hint>
+                  <mat-error *ngIf="shouldShowError('workingDaysCustom')">{{ getErrorMessage('workingDaysCustom') }}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <section class="selected-contract-panel" *ngIf="selectedContractDefinition as contract">
+                <div class="selected-contract-copy">
+                  <span class="section-kicker">Info contratto</span>
+                  <h2>{{ selectedContractLabel }}</h2>
+                  <p>{{ contract.notes }}</p>
+                </div>
+
+                <div class="selected-contract-meta">
+                  <span class="meta-pill">{{ selectedContractDataStateLabel }}</span>
+                  <span class="meta-pill">{{ workingDaysSummary }}</span>
+                  <span class="meta-pill">{{ contract.annualLeaveSuggestion }} gg ferie / {{ contract.annualPermitHoursSuggestion }} h permessi</span>
+                </div>
+
+                <div class="contract-source-row">
+                  <div class="contract-source-stack">
+                    <a
+                      *ngIf="contract.sourceUrl"
+                      class="contract-source-link"
+                      [href]="contract.sourceUrl"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      {{ getSelectedContractInfoLabel() }}
+                    </a>
+                    <span *ngIf="!contract.sourceUrl" class="contract-source-muted">{{ getSelectedContractInfoLabel() }}</span>
+                    <span class="contract-source-label" *ngIf="contract.sourceLabel">{{ contract.sourceLabel }}</span>
+                  </div>
+                </div>
+
+                <p class="contract-disclaimer">{{ contractSourceMicrocopy }}</p>
+              </section>
+            </div>
+
+            <div *ngSwitchCase="'allowances'" class="step-stack">
+              <section class="selected-contract-panel" *ngIf="suggestion as currentSuggestion; else suggestionFallback">
+                <div class="selected-contract-copy">
+                  <span class="section-kicker">Valori suggeriti dal contratto</span>
+                  <h2>{{ selectedContractLabel }}</h2>
+                  <p>{{ currentSuggestion.explanation }}</p>
+                </div>
+
+                <div class="selected-contract-meta">
+                  <span class="meta-pill">{{ selectedContractDataStateLabel }}</span>
+                  <span class="meta-pill">{{ currentSuggestion.workingDaysPerWeek }} giorni a settimana</span>
+                  <span class="meta-pill">{{ currentSuggestion.annualLeaveSuggested }} gg ferie / {{ currentSuggestion.annualPermitHoursSuggested }} h permessi</span>
+                </div>
+
+                <div class="contract-source-row">
+                  <div class="contract-source-stack">
+                    <a
+                      *ngIf="hasSelectedContractSource"
+                      class="contract-source-link"
+                      [href]="selectedContractSourceUrl ?? ''"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      {{ getSelectedContractInfoLabel() }}
+                    </a>
+                    <span *ngIf="!hasSelectedContractSource" class="contract-source-muted">{{ getSelectedContractInfoLabel() }}</span>
+                    <span class="contract-source-label" *ngIf="selectedContractDefinition?.sourceLabel">
+                      {{ selectedContractDefinition?.sourceLabel }}
+                    </span>
+                  </div>
+                </div>
+
+                <p class="contract-disclaimer">{{ currentSuggestion.disclaimer }}</p>
+              </section>
+
+              <ng-template #suggestionFallback>
+                <div class="inline-alert inline-alert-info">
+                  Completa contratto e giorni lavorativi per vedere la configurazione iniziale ferie e permessi.
+                </div>
+              </ng-template>
+
+              <div class="allowance-status" *ngIf="allowanceSelectionSummary as summary">
+                <div class="allowance-status-copy">
+                  <span class="status-pill" [class.is-personalized]="summary.state === 'personalized'">{{ summary.stateLabel }}</span>
+                  <p>{{ summary.stateDescription }}</p>
+                </div>
+
+                <button mat-stroked-button type="button" (click)="applySuggestedValues()">
+                  Ripristina i valori suggeriti
+                </button>
+              </div>
+
+              <div class="allowance-editor-grid" *ngIf="allowanceSelectionSummary as summary">
+                <article class="allowance-editor-card">
+                  <div class="allowance-editor-head">
+                    <div>
+                      <span class="summary-card-kicker">Configurazione iniziale ferie e permessi</span>
+                      <h2>Ferie annue</h2>
+                    </div>
+
+                    <span class="status-pill" [class.is-personalized]="summary.annualLeave.isCustomized">
+                      {{ summary.annualLeave.stateLabel }}
+                    </span>
+                  </div>
+
+                  <div class="allowance-values-row">
+                    <div class="allowance-stat">
+                      <span>Suggerito dal contratto</span>
+                      <strong>{{ summary.annualLeave.suggestedValue }}</strong>
+                      <small>{{ summary.annualLeave.longUnitLabel }}</small>
+                    </div>
+
+                    <div class="allowance-stat">
+                      <span>Valore finale che verra' salvato</span>
+                      <strong>{{ summary.annualLeave.finalValue }}</strong>
+                      <small>{{ summary.annualLeave.longUnitLabel }}</small>
+                    </div>
+
+                    <div class="allowance-stat is-delta">
+                      <span>Differenza</span>
+                      <strong>{{ getAllowanceDifferenceLabel(summary.annualLeave) }}</strong>
+                      <small>{{ summary.annualLeave.isCustomized ? 'Valore personalizzato' : 'Confermi la proposta iniziale' }}</small>
+                    </div>
+                  </div>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Valore finale ferie</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      min="0"
+                      step="1"
+                      inputmode="numeric"
+                      formControlName="giorniTotali"
+                      placeholder="Es. 20"
+                    >
+                    <mat-hint>Suggerito: {{ summary.annualLeave.suggestedValue }} giorni</mat-hint>
+                    <mat-error *ngIf="shouldShowError('giorniTotali')">{{ getErrorMessage('giorniTotali') }}</mat-error>
+                  </mat-form-field>
+                </article>
+
+                <article class="allowance-editor-card">
+                  <div class="allowance-editor-head">
+                    <div>
+                      <span class="summary-card-kicker">Configurazione iniziale ferie e permessi</span>
+                      <h2>Ore permessi annue</h2>
+                    </div>
+
+                    <span class="status-pill" [class.is-personalized]="summary.annualPermitHours.isCustomized">
+                      {{ summary.annualPermitHours.stateLabel }}
+                    </span>
+                  </div>
+
+                  <div class="allowance-values-row">
+                    <div class="allowance-stat">
+                      <span>Suggerito dal contratto</span>
+                      <strong>{{ summary.annualPermitHours.suggestedValue }}</strong>
+                      <small>{{ summary.annualPermitHours.longUnitLabel }}</small>
+                    </div>
+
+                    <div class="allowance-stat">
+                      <span>Valore finale che verra' salvato</span>
+                      <strong>{{ summary.annualPermitHours.finalValue }}</strong>
+                      <small>{{ summary.annualPermitHours.longUnitLabel }}</small>
+                    </div>
+
+                    <div class="allowance-stat is-delta">
+                      <span>Differenza</span>
+                      <strong>{{ getAllowanceDifferenceLabel(summary.annualPermitHours) }}</strong>
+                      <small>{{ summary.annualPermitHours.isCustomized ? 'Valore personalizzato' : 'Confermi la proposta iniziale' }}</small>
+                    </div>
+                  </div>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Valore finale ore permessi</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      min="0"
+                      step="1"
+                      inputmode="numeric"
+                      formControlName="oreTotali"
+                      placeholder="Es. 104"
+                    >
+                    <mat-hint>Suggerito: {{ summary.annualPermitHours.suggestedValue }} ore</mat-hint>
+                    <mat-error *ngIf="shouldShowError('oreTotali')">{{ getErrorMessage('oreTotali') }}</mat-error>
+                  </mat-form-field>
+                </article>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'summary'" class="step-stack">
+              <div class="inline-alert inline-alert-info">
+                Il profilo verra' creato solo quando clicchi <strong>Crea profilo</strong>.
+              </div>
+
+              <div class="section-heading summary-intro">
+                <h2>Dati da confermare</h2>
+                <p>Verifica account, contratto e configurazione iniziale prima della conferma finale.</p>
+              </div>
+
+              <section class="summary-shell" *ngIf="allowanceSelectionSummary as summary">
+                <div class="summary-main">
+                  <div class="summary-stack">
+                    <article class="summary-card">
+                      <div class="summary-card-header">
+                        <div>
+                          <span class="summary-card-kicker">Account</span>
+                          <h2>Dati account</h2>
+                        </div>
+
+                        <button mat-button type="button" (click)="goToStep(0)">Modifica</button>
+                      </div>
+
+                      <dl class="summary-list">
+                        <div class="summary-row">
+                          <dt>Nome</dt>
+                          <dd>{{ form.controls.nome.value }}</dd>
+                        </div>
+                        <div class="summary-row">
+                          <dt>Cognome</dt>
+                          <dd>{{ form.controls.cognome.value }}</dd>
+                        </div>
+                        <div class="summary-row">
+                          <dt>Username</dt>
+                          <dd>{{ form.controls.username.value }}</dd>
+                        </div>
+                        <div class="summary-row">
+                          <dt>Email</dt>
+                          <dd>{{ form.controls.email.value }}</dd>
+                        </div>
+                      </dl>
+                    </article>
+
+                    <article class="summary-card summary-card-highlight">
+                      <div class="summary-card-header">
+                        <div>
+                          <span class="summary-card-kicker">Contratto</span>
+                          <h2>Contratto selezionato</h2>
+                        </div>
+
+                        <button mat-button type="button" (click)="goToStep(1)">Modifica</button>
+                      </div>
+
+                      <dl class="summary-list">
+                        <div class="summary-row">
+                          <dt>Contratto</dt>
+                          <dd>{{ selectedContractLabel }}</dd>
+                        </div>
+                        <div class="summary-row">
+                          <dt>Giorni lavorativi</dt>
+                          <dd>{{ workingDaysSummary }}</dd>
+                        </div>
+                        <div class="summary-row">
+                          <dt>Stato del riferimento</dt>
+                          <dd>{{ selectedContractDataStateLabel }}</dd>
+                        </div>
+                      </dl>
+
+                      <p class="summary-support-copy" *ngIf="selectedContractNotes">{{ selectedContractNotes }}</p>
+
+                      <div class="contract-source-row">
+                        <div class="contract-source-stack">
+                          <a
+                            *ngIf="hasSelectedContractSource"
+                            class="contract-source-link"
+                            [href]="selectedContractSourceUrl ?? ''"
+                            target="_blank"
+                            rel="noreferrer noopener"
+                          >
+                            {{ getSelectedContractInfoLabel() }}
+                          </a>
+                          <span *ngIf="!hasSelectedContractSource" class="contract-source-muted">{{ getSelectedContractInfoLabel() }}</span>
+                          <span class="contract-source-label" *ngIf="selectedContractDefinition?.sourceLabel">
+                            {{ selectedContractDefinition?.sourceLabel }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p class="contract-disclaimer">{{ contractSourceMicrocopy }}</p>
+                    </article>
+
+                    <article class="summary-card summary-card-emphasis">
+                      <div class="summary-card-header">
+                        <div>
+                          <span class="summary-card-kicker">Configurazione iniziale ferie e permessi</span>
+                          <h2>Valori finali che verranno salvati</h2>
+                        </div>
+
+                        <button mat-button type="button" (click)="goToStep(2)">Modifica</button>
+                      </div>
+
+                      <div class="summary-metrics">
+                        <div class="summary-metric">
+                          <span>Ferie annue</span>
+                          <strong>{{ summary.annualLeave.finalValue }}</strong>
+                          <small>giorni</small>
+                        </div>
+
+                        <div class="summary-metric">
+                          <span>Ore permessi annue</span>
+                          <strong>{{ summary.annualPermitHours.finalValue }}</strong>
+                          <small>ore</small>
+                        </div>
+                      </div>
+
+                      <p class="summary-support-copy">{{ summary.stateDescription }}</p>
+                    </article>
+                  </div>
+                </div>
+
+                <aside class="origin-panel">
+                  <div class="origin-panel-header">
+                    <span class="status-pill" [class.is-personalized]="summary.state === 'personalized'">{{ summary.stateLabel }}</span>
+                    <h3>Origine dei saldi</h3>
+                    <p>Qui vedi con chiarezza da dove parte la proposta iniziale e quali valori finali verranno salvati.</p>
+                  </div>
+
+                  <dl class="origin-list">
+                    <div class="origin-row">
+                      <dt>Contratto selezionato</dt>
+                      <dd>{{ selectedContractLabel }}</dd>
+                    </div>
+                    <div class="origin-row">
+                      <dt>Valori suggeriti dal sistema</dt>
+                      <dd>{{ summary.annualLeave.suggestedValue }} gg / {{ summary.annualPermitHours.suggestedValue }} h</dd>
+                    </div>
+                    <div class="origin-row">
+                      <dt>Valori finali che verranno salvati</dt>
+                      <dd>{{ summary.annualLeave.finalValue }} gg / {{ summary.annualPermitHours.finalValue }} h</dd>
+                    </div>
+                    <div class="origin-row">
+                      <dt>Stato finale</dt>
+                      <dd>{{ summary.stateLabel }}</dd>
+                    </div>
+                  </dl>
+
+                  <div class="origin-comparison">
+                    <div class="origin-mini-row">
+                      <span>Ferie annue</span>
+                      <strong>{{ getAllowanceDifferenceLabel(summary.annualLeave) }}</strong>
+                    </div>
+                    <div class="origin-mini-row">
+                      <span>Ore permessi annue</span>
+                      <strong>{{ getAllowanceDifferenceLabel(summary.annualPermitHours) }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="contract-source-row">
+                    <div class="contract-source-stack">
+                      <a
+                        *ngIf="hasSelectedContractSource"
+                        class="contract-source-link"
+                        [href]="selectedContractSourceUrl ?? ''"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        {{ getSelectedContractInfoLabel() }}
+                      </a>
+                      <span *ngIf="!hasSelectedContractSource" class="contract-source-muted">{{ getSelectedContractInfoLabel() }}</span>
+                      <span class="contract-source-label" *ngIf="selectedContractDefinition?.sourceLabel">
+                        {{ selectedContractDefinition?.sourceLabel }}
+                      </span>
+                    </div>
+                  </div>
+                </aside>
+              </section>
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button *ngIf="canGoBack; else actionsSpacer" mat-stroked-button type="button" (click)="goToPreviousStep()">
+              Indietro
+            </button>
+
+            <ng-template #actionsSpacer>
+              <span></span>
+            </ng-template>
+
+            <button mat-raised-button color="primary" type="submit" class="primary-action" [disabled]="loading">
+              <span class="button-spinner" *ngIf="loading" aria-hidden="true"></span>
+              <span>{{ primaryActionLabel }}</span>
+            </button>
+          </div>
+
+          <div class="auth-footer">
+            <span>Hai gia' un account?</span>
+            <a routerLink="/auth/login" queryParamsHandling="preserve">Accedi</a>
+          </div>
+        </div>
+      </form>
     </mat-card>
   </div>
 
-  <div class="auth-aside">
+  <aside class="register-aside">
     <div class="aside-card">
-      <div class="aside-badge">Onboarding guidato</div>
-      <h2>Porta ordine nella gestione del tempo</h2>
-      <p>Dashboard complete, workflow di approvazione e report mensili per HR, manager e dipendenti in un solo spazio.</p>
+      <div class="aside-header">
+        <div class="aside-badge">{{ currentStep.panelBadge }}</div>
+        <h2>{{ currentStep.panelTitle }}</h2>
+        <p>{{ currentStep.panelDescription }}</p>
+      </div>
 
-      <div class="mockup-card" aria-hidden="true">
-        <div class="mockup-toolbar"></div>
-        <div class="calendar-mini">
-          <div class="calendar-cell active"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell success"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell active"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell success"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell"></div>
-          <div class="calendar-cell success"></div>
+      <div class="aside-metrics">
+        <div class="aside-metric" *ngFor="let metric of currentStep.panelMetrics">
+          <div class="aside-metric-value">{{ metric.value }}</div>
+          <div class="aside-metric-label">{{ metric.label }}</div>
         </div>
       </div>
 
-      <div class="aside-grid">
-        <div>
-          <div class="kpi-value">24/7</div>
-          <div class="kpi-label">Monitoraggio</div>
+      <div class="aside-preview">
+        <span class="aside-section-label">Anteprima profilo</span>
+        <dl class="preview-list">
+          <div class="preview-row" *ngFor="let row of previewRows">
+            <dt>{{ row.label }}</dt>
+            <dd>{{ row.value }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="aside-support" *ngIf="currentStep.id !== 'summary'; else summaryAside">
+        <span class="aside-section-label">Perche' questo onboarding aiuta</span>
+        <ul class="support-list">
+          <li *ngFor="let bullet of currentStep.panelBullets">{{ bullet }}</li>
+        </ul>
+      </div>
+
+      <ng-template #summaryAside>
+        <div class="aside-support" *ngIf="allowanceSelectionSummary as summary">
+          <span class="aside-section-label">Prima della conferma</span>
+          <div class="aside-summary-state">
+            <strong>{{ summary.stateLabel }}</strong>
+            <p>{{ summary.stateDescription }}</p>
+          </div>
+          <div class="aside-check-grid">
+            <div class="aside-check-row">
+              <span>Contratto</span>
+              <strong>{{ selectedContractLabel }}</strong>
+            </div>
+            <div class="aside-check-row">
+              <span>Fonte</span>
+              <strong>{{ hasSelectedContractSource ? 'Disponibile' : 'Non disponibile' }}</strong>
+            </div>
+            <div class="aside-check-row">
+              <span>Valori finali</span>
+              <strong>{{ configurationSummary }}</strong>
+            </div>
+          </div>
         </div>
-        <div>
-          <div class="kpi-value">+12</div>
-          <div class="kpi-label">Report KPI</div>
-        </div>
+      </ng-template>
+
+      <div class="aside-note" *ngIf="suggestion && currentStep.id !== 'summary'">
+        <span class="aside-note-label">Proposta iniziale</span>
+        <strong>{{ suggestion.annualLeaveSuggested }} gg ferie / {{ suggestion.annualPermitHoursSuggested }} h permessi</strong>
+        <p>{{ suggestion.disclaimer }}</p>
       </div>
     </div>
-  </div>
+  </aside>
 </div>
