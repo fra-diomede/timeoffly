@@ -1,4 +1,16 @@
 User-agent: *
 Allow: /
+Allow: /gestione-ferie-dipendenti
+Allow: /auth/login
+Allow: /auth/register
+Allow: /privacy
+Allow: /terms
+Disallow: /dashboard
+Disallow: /ferie
+Disallow: /calendario
+Disallow: /team
+Disallow: /approvals
+Disallow: /admin
+Disallow: /profilo
 
 Sitemap: https://timeoffly-bice.vercel.app/sitemap.xml
