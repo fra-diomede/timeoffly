@@ -149,6 +149,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/ferie/ferie.component').then(m => m.FerieComponent)
       },
       {
+        path: 'permessi-104',
+        title: 'Dashboard permessi 104 | TimeOffly',
+        data: {
+          seo: {
+            description: 'Configura pratica 104, assistiti e analytics mensili con controllo preciso di giorni, ore, residui e quote perse.',
+            robots: PRIVATE_ROBOTS,
+            canonicalPath: '/permessi-104'
+          }
+        },
+        loadComponent: () => import('./pages/permessi-104/permessi-104.component').then(m => m.Permessi104Component)
+      },
+      {
         path: 'calendario',
         title: 'Calendario assenze | TimeOffly',
         data: {

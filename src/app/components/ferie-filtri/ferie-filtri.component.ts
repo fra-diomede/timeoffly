@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import {MatFormField, MatLabel, MatOption, MatSelect} from '@angular/material/select';
+import { MatFormField, MatLabel, MatOption, MatSelect } from '@angular/material/select';
 
 export enum MeseFiltro {
   ANNO_INTERO = 0,
@@ -13,6 +13,7 @@ export enum MeseFiltro {
 
 @Component({
   selector: 'app-ferie-filtro',
+  standalone: true,
   templateUrl: './ferie-filtri.component.html',
   imports: [
     MatOption,

@@ -1,0 +1,365 @@
+<div class="page fade-in permessi-104-page">
+  <section class="page-hero permessi-104-hero">
+    <div class="page-hero-copy">
+      <span class="page-hero-eyebrow">Permessi 104 PRO</span>
+      <h1 class="page-hero-title">Dashboard permessi 104</h1>
+      <p class="page-hero-subtitle">
+        Configura la pratica, gestisci gli assistiti, controlla il plafond mensile e registra utilizzi a giorni oppure a ore senza perdere il dettaglio operativo.
+      </p>
+
+      <div class="page-hero-metrics">
+        <div class="page-hero-metric">
+          <strong>{{ assistiti.length }}</strong>
+          <span>assistiti censiti</span>
+        </div>
+        <div class="page-hero-metric">
+          <strong>{{ currentMode }}</strong>
+          <span>modalita di fruizione</span>
+        </div>
+        <div class="page-hero-metric">
+          <strong>{{ currentAvailabilityLabel }}</strong>
+          <span>disponibilita mese corrente</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-hero-art" aria-hidden="true">
+      <div class="hero-visual permessi-visual">
+        <div class="hero-visual-toolbar"></div>
+        <div class="hero-bars">
+          <span class="is-success"></span>
+          <span class="is-active"></span>
+          <span class="is-short"></span>
+          <span class="is-success"></span>
+          <span class="is-active"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-header">
+      <div>
+        <h2 class="section-title">A. Config Setup</h2>
+        <div class="section-subtitle">Dati base della pratica, decorrenza effettiva e parametri che guidano il calcolo mensile.</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <mat-card class="config-card">
+        <div class="card-header">Configurazione pratica</div>
+        <div class="card-body">
+          <form [formGroup]="configForm" class="form-grid">
+            <div class="form-grid form-grid-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Data accettazione</mat-label>
+                <input matInput [matDatepicker]="acceptancePicker" formControlName="dataAccettazione">
+                <mat-datepicker-toggle matSuffix [for]="acceptancePicker"></mat-datepicker-toggle>
+                <mat-datepicker #acceptancePicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Data inizio fruizione</mat-label>
+                <input matInput [matDatepicker]="startPicker" formControlName="dataInizioFruizione">
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <div class="form-grid form-grid-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Protocollo</mat-label>
+                <input matInput formControlName="protocollo" placeholder="Es. 104-2026-001">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Grado parentela</mat-label>
+                <mat-select formControlName="gradoParentela">
+                  <mat-option *ngFor="let option of parentelaOptions" [value]="option">{{ option }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="form-grid form-grid-3">
+              <mat-form-field appearance="outline">
+                <mat-label>Modalita fruizione</mat-label>
+                <mat-select formControlName="modalitaFruizione">
+                  <mat-option value="GIORNI">GIORNI</mat-option>
+                  <mat-option value="ORE">ORE</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Ore settimanali</mat-label>
+                <input matInput type="number" formControlName="oreSettimanali">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Giorni lavorativi settimanali</mat-label>
+                <input matInput type="number" formControlName="giorniLavorativiSettimanali">
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <div class="card-header">Riepilogo configurazione</div>
+        <div class="card-body">
+          <div class="summary-list">
+            <div class="summary-row">
+              <span>Decorrenza effettiva</span>
+              <strong>{{ formatDate(effectiveStartDate) }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Media ore giornaliere</span>
+              <strong>{{ formatHourValue(dashboardData.averageDailyHours) }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Monte ore mensile equivalente</span>
+              <strong>{{ formatHourValue(dashboardData.monthlyHourAllowance) }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Plafond giorni mensile</span>
+              <strong>{{ formatDayValue(currentMonth.totalDays) }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Protocollo attivo</span>
+              <strong>{{ configForm.controls.protocollo.value || 'Da completare' }}</strong>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-header">
+      <div>
+        <h2 class="section-title">B. Assistiti Management</h2>
+        <div class="section-subtitle">Anagrafica rapida degli assistiti collegati alla pratica 104.</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <mat-card class="assistiti-card">
+        <div class="card-header">Nuovo assistito</div>
+        <div class="card-body">
+          <form [formGroup]="assistitoForm" class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nome</mat-label>
+              <input matInput formControlName="nome" placeholder="Nome e cognome">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Grado parentela</mat-label>
+              <mat-select formControlName="gradoParentela">
+                <mat-option *ngFor="let option of parentelaOptions" [value]="option">{{ option }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-raised-button color="primary" type="button" (click)="addAssistito()">Aggiungi assistito</button>
+            </div>
+          </form>
+        </div>
+      </mat-card>
+
+      <mat-card class="assistiti-card">
+        <div class="card-header">Assistiti registrati</div>
+        <div class="card-body">
+          <div class="entity-list" *ngIf="assistiti.length; else emptyAssistiti">
+            <div class="entity-item" *ngFor="let assistito of assistiti; trackBy: trackById">
+              <div>
+                <div class="item-title">{{ assistito.nome }}</div>
+                <div class="item-sub">{{ assistito.gradoParentela }}</div>
+              </div>
+              <button mat-icon-button type="button" aria-label="Rimuovi assistito" (click)="removeAssistito(assistito.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <ng-template #emptyAssistiti>
+            <div class="empty-state">Nessun assistito aggiunto.</div>
+          </ng-template>
+        </div>
+      </mat-card>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-header">
+      <div>
+        <h2 class="section-title">C. Dashboard</h2>
+        <div class="section-subtitle">Quadro del mese corrente con disponibilita residue, utilizzo e quote perse dei mesi gia chiusi.</div>
+      </div>
+    </div>
+
+    <div class="grid grid-3 metrics-grid">
+      <mat-card class="metric-card metric-card--available">
+        <div class="card-body">
+          <div class="metric-label">Giorni totali mese</div>
+          <div class="metric-value">{{ formatDayValue(currentMonth.totalDays) }}</div>
+          <div class="metric-meta">{{ formatHourValue(currentMonth.totalHours) }} equivalenti</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--available">
+        <div class="card-body">
+          <div class="metric-label">Ore totali mese</div>
+          <div class="metric-value">{{ formatHourValue(currentMonth.totalHours) }}</div>
+          <div class="metric-meta">{{ formatDayValue(currentMonth.totalDays) }} equivalenti</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--used">
+        <div class="card-body">
+          <div class="metric-label">Usati (giorni/ore)</div>
+          <div class="metric-value">{{ formatUsageValue(currentMonth.usedDays, currentMonth.usedHours) }}</div>
+          <div class="metric-meta">{{ formatSecondaryUsage(currentMonth.usedDays, currentMonth.usedHours) }}</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--available">
+        <div class="card-body">
+          <div class="metric-label">Rimanenti</div>
+          <div class="metric-value">{{ formatUsageValue(currentMonth.remainingDays, currentMonth.remainingHours) }}</div>
+          <div class="metric-meta">{{ formatSecondaryUsage(currentMonth.remainingDays, currentMonth.remainingHours) }}</div>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--lost">
+        <div class="card-body">
+          <div class="metric-label">Persi (mesi precedenti)</div>
+          <div class="metric-value">{{ formatUsageValue(dashboardData.lostPreviousDays, dashboardData.lostPreviousHours) }}</div>
+          <div class="metric-meta">{{ formatSecondaryUsage(dashboardData.lostPreviousDays, dashboardData.lostPreviousHours) }}</div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="legend-row">
+      <span class="legend-item legend-item--available">Verde = disponibile</span>
+      <span class="legend-item legend-item--used">Giallo = usato</span>
+      <span class="legend-item legend-item--lost">Rosso = perso</span>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-header">
+      <div>
+        <h2 class="section-title">D. Usage Input</h2>
+        <div class="section-subtitle">Inserimento puntuale delle fruizioni con blocco immediato in caso di superamento del limite mensile.</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <mat-card class="usage-card">
+        <div class="card-header">Nuova fruizione</div>
+        <div class="card-body">
+          <form [formGroup]="usageForm" class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Data utilizzo</mat-label>
+              <input matInput [matDatepicker]="usagePicker" formControlName="data">
+              <mat-datepicker-toggle matSuffix [for]="usagePicker"></mat-datepicker-toggle>
+              <mat-datepicker #usagePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="isHourlyMode">
+              <mat-label>Ore</mat-label>
+              <input matInput type="number" step="0.5" formControlName="ore">
+            </mat-form-field>
+
+            <div class="status-banner status-banner--warning" *ngIf="usageWarningMessage">
+              {{ usageWarningMessage }}
+            </div>
+
+            <div class="status-banner status-banner--error" *ngIf="usageDateMessage">
+              {{ usageDateMessage }}
+            </div>
+
+            <div class="status-banner status-banner--info" *ngIf="usageAlertMessage">
+              {{ usageAlertMessage }}
+            </div>
+
+            <div class="form-actions">
+              <button mat-raised-button color="primary" type="button" (click)="addUsage()">Registra utilizzo</button>
+            </div>
+          </form>
+        </div>
+      </mat-card>
+
+      <mat-card class="usage-card">
+        <div class="card-header">Utilizzi registrati</div>
+        <div class="card-body">
+          <div class="entity-list" *ngIf="usages.length; else emptyUsage">
+            <div class="entity-item" *ngFor="let usage of usages; trackBy: trackById">
+              <div>
+                <div class="item-title">{{ formatDate(usage.data) }}</div>
+                <div class="item-sub">{{ usage.modalita }} · {{ usageQuantityLabel(usage) }}</div>
+              </div>
+              <button mat-icon-button type="button" aria-label="Rimuovi utilizzo" (click)="removeUsage(usage.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <ng-template #emptyUsage>
+            <div class="empty-state">Nessun utilizzo registrato.</div>
+          </ng-template>
+        </div>
+      </mat-card>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="page-header">
+      <div>
+        <h2 class="section-title">E. Monthly Analytics</h2>
+        <div class="section-subtitle">Dettaglio mese per mese con visione delle quote totali, utilizzate, residue e perse.</div>
+      </div>
+    </div>
+
+    <mat-card class="table-card">
+      <div class="card-body">
+        <div class="table-wrap">
+          <table class="analytics-table">
+            <thead>
+              <tr>
+                <th>Mese</th>
+                <th>Giorni totali</th>
+                <th>Ore totali</th>
+                <th>Usati</th>
+                <th>Rimanenti</th>
+                <th>Persi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let month of dashboardData.monthlyAnalytics" [class.is-inactive]="!month.active">
+                <td>{{ month.monthLabel }}</td>
+                <td>{{ formatDayValue(month.totalDays) }}</td>
+                <td>{{ formatHourValue(month.totalHours) }}</td>
+                <td class="cell-used">
+                  <strong>{{ formatUsageValue(month.usedDays, month.usedHours) }}</strong>
+                  <span>{{ formatSecondaryUsage(month.usedDays, month.usedHours) }}</span>
+                </td>
+                <td class="cell-available">
+                  <strong>{{ formatUsageValue(month.remainingDays, month.remainingHours) }}</strong>
+                  <span>{{ formatSecondaryUsage(month.remainingDays, month.remainingHours) }}</span>
+                </td>
+                <td class="cell-lost">
+                  <strong>{{ formatUsageValue(month.lostDays, month.lostHours) }}</strong>
+                  <span>{{ formatSecondaryUsage(month.lostDays, month.lostHours) }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </mat-card>
+  </section>
+
+  <div class="disclaimer">
+    I dati sono indicativi e possono variare in base al contratto e alle disposizioni aziendali
+  </div>
+</div>

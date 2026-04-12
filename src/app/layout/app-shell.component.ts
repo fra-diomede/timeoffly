@@ -40,6 +40,7 @@ export class AppShellComponent {
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'space_dashboard' },
     { label: 'Ferie', route: '/ferie', icon: 'event_available' },
+    { label: 'Permessi 104', route: '/permessi-104', icon: 'volunteer_activism' },
     { label: 'Calendario', route: '/calendario', icon: 'calendar_month' },
     { label: 'Team', route: '/team', icon: 'groups', roles: ['MANAGER', 'ADMIN'] },
     { label: 'Approvazioni', route: '/approvals', icon: 'verified', roles: ['MANAGER', 'ADMIN'] },
