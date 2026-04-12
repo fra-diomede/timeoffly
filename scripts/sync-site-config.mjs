@@ -10,6 +10,15 @@ const siteConfigPath = path.join(projectRoot, 'src', 'config', 'site.config.json
 const indexPath = path.join(projectRoot, 'src', 'index.html');
 const robotsPath = path.join(projectRoot, 'public', 'robots.txt');
 const sitemapPath = path.join(projectRoot, 'public', 'sitemap.xml');
+const sitemapEntries = [
+  { path: '/', priority: '1.0' },
+  { path: '/gestione-ferie-dipendenti', priority: '0.8' },
+  { path: '/calcolo-ferie-metalmeccanico', priority: '0.8' },
+  { path: '/permessi-104', priority: '0.8' },
+  { path: '/dashboard', priority: '0.8' },
+  { path: '/login', priority: '0.8' },
+  { path: '/register', priority: '0.8' }
+];
 
 function normalizeOrigin(url) {
   return String(url ?? '').trim().replace(/\/+$/, '');
@@ -29,21 +38,29 @@ function replaceOrThrow(content, pattern, replacement, filePath) {
   return content.replace(pattern, replacement);
 }
 
+function formatLocalDate(value = new Date()) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function buildSitemap(siteUrl) {
+  const lastmod = formatLocalDate();
+  const urls = sitemapEntries
+    .map(
+      ({ path, priority }) => `  <url>
+    <loc>${path === '/' ? `${siteUrl}/` : `${siteUrl}${path}`}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>${priority}</priority>
+  </url>`
+    )
+    .join('\n');
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${siteUrl}/</loc>
-  </url>
-  <url>
-    <loc>${siteUrl}/gestione-ferie-dipendenti</loc>
-  </url>
-  <url>
-    <loc>${siteUrl}/auth/login</loc>
-  </url>
-  <url>
-    <loc>${siteUrl}/auth/register</loc>
-  </url>
+${urls}
 </urlset>
 `;
 }
@@ -51,18 +68,6 @@ function buildSitemap(siteUrl) {
 function buildRobots(siteUrl) {
   return `User-agent: *
 Allow: /
-Allow: /gestione-ferie-dipendenti
-Allow: /auth/login
-Allow: /auth/register
-Allow: /privacy
-Allow: /terms
-Disallow: /dashboard
-Disallow: /ferie
-Disallow: /calendario
-Disallow: /team
-Disallow: /approvals
-Disallow: /admin
-Disallow: /profilo
 
 Sitemap: ${siteUrl}/sitemap.xml
 `;
