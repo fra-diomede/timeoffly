@@ -10,6 +10,18 @@ export interface Permesso104Config {
   giorniLavorativiSettimanali: number | null;
 }
 
+export interface Permesso104ConfigDto {
+  id?: number | null;
+  userId: string;
+  dataAccettazione: string | null;
+  dataInizioFruizione: string | null;
+  protocollo: string;
+  gradoParentela: string;
+  modalitaFruizione: Permesso104Mode;
+  oreSettimanali: number | null;
+  giorniLavorativiSettimanali: number | null;
+}
+
 export interface Permesso104Assistito {
   id: string;
   nome: string;

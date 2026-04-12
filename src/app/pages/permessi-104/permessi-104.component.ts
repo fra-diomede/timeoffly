@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,8 +10,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
-import { merge } from 'rxjs';
+import { isValid, parseISO } from 'date-fns';
+import { finalize, merge } from 'rxjs';
 import { startWith } from 'rxjs/operators';
+import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { Permessi104Service } from '../../core/services/permessi104.service';
+import { toIsoDate } from '../../core/utils/date.util';
 import {
   buildPermessi104DashboardData,
   getEffectiveStartDate,
@@ -20,6 +25,7 @@ import {
 import {
   Permesso104Assistito,
   Permesso104Config,
+  Permesso104ConfigDto,
   Permesso104Mode,
   Permesso104MonthAnalytics,
   Permessi104DashboardData,
@@ -45,7 +51,7 @@ import {
   templateUrl: './permessi-104.component.html',
   styleUrls: ['./permessi-104.component.scss']
 })
-export class Permessi104Component {
+export class Permessi104Component implements OnInit {
   readonly parentelaOptions = [
     'Coniuge',
     'Genitore',
@@ -55,19 +61,20 @@ export class Permessi104Component {
     'Altro'
   ];
   readonly today = new Date();
-  readonly currentMonthStart = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
-  readonly currentYear = this.today.getFullYear();
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly permessi104Service = inject(Permessi104Service);
 
   readonly configForm = this.fb.group({
-    dataAccettazione: this.fb.control<Date | null>(this.currentMonthStart, Validators.required),
-    dataInizioFruizione: this.fb.control<Date | null>(this.currentMonthStart, Validators.required),
+    dataAccettazione: this.fb.control<Date | null>(null, Validators.required),
+    dataInizioFruizione: this.fb.control<Date | null>(null, Validators.required),
     protocollo: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(40)] }),
     gradoParentela: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
     modalitaFruizione: this.fb.control<Permesso104Mode>('GIORNI', { nonNullable: true, validators: [Validators.required] }),
-    oreSettimanali: this.fb.control<number | null>(40, [Validators.required, Validators.min(1)]),
-    giorniLavorativiSettimanali: this.fb.control<number | null>(5, [Validators.required, Validators.min(1), Validators.max(7)])
+    oreSettimanali: this.fb.control<number | null>(null, [Validators.required, Validators.min(1)]),
+    giorniLavorativiSettimanali: this.fb.control<number | null>(null, [Validators.required, Validators.min(1), Validators.max(7)])
   });
 
   readonly assistitoForm = this.fb.group({
@@ -83,6 +90,9 @@ export class Permessi104Component {
   assistiti: Permesso104Assistito[] = [];
   usages: Permesso104Usage[] = [];
   dashboardData: Permessi104DashboardData = buildPermessi104DashboardData(this.configSnapshot, []);
+  loadingConfig = false;
+  savedConfig: Permesso104ConfigDto | null = null;
+  savingConfig = false;
   usageAlertMessage = '';
   usageDateMessage = '';
   usageWarningMessage = '';
@@ -106,6 +116,10 @@ export class Permessi104Component {
       });
   }
 
+  ngOnInit(): void {
+    this.loadConfig();
+  }
+
   get currentMode(): Permesso104Mode {
     return this.configForm.controls.modalitaFruizione.value;
   }
@@ -124,6 +138,10 @@ export class Permessi104Component {
 
   get currentAvailabilityLabel(): string {
     return this.buildAvailabilityLabel(this.currentMonth.remainingDays, this.currentMonth.remainingHours);
+  }
+
+  get currentUserId(): string | null {
+    return this.authService.getSession()?.username ?? null;
   }
 
   addAssistito(): void {
@@ -191,6 +209,39 @@ export class Permessi104Component {
     this.refreshUsageMessages();
   }
 
+  saveConfiguration(): void {
+    const userId = this.currentUserId;
+    if (!userId) {
+      this.notificationService.error('Utente non disponibile per il salvataggio della configurazione 104');
+      return;
+    }
+
+    if (this.configForm.invalid) {
+      this.configForm.markAllAsTouched();
+      return;
+    }
+
+    this.savingConfig = true;
+    this.permessi104Service
+      .saveConfig(this.toDto(userId))
+      .pipe(
+        finalize(() => {
+          this.savingConfig = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: response => {
+          this.savedConfig = response;
+          this.applySavedConfig(response);
+          this.notificationService.success('Configurazione 104 salvata correttamente');
+        },
+        error: () => {
+          this.notificationService.error('Salvataggio configurazione 104 non riuscito');
+        }
+      });
+  }
+
   formatDate(value: Date | null): string {
     if (!value) {
       return '-';
@@ -243,6 +294,39 @@ export class Permessi104Component {
     };
   }
 
+  private loadConfig(): void {
+    const userId = this.currentUserId;
+    if (!userId) {
+      this.resetConfigForm();
+      return;
+    }
+
+    this.loadingConfig = true;
+    this.permessi104Service
+      .getConfig(userId)
+      .pipe(
+        finalize(() => {
+          this.loadingConfig = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: response => {
+          this.savedConfig = response;
+          if (response) {
+            this.applySavedConfig(response);
+            return;
+          }
+
+          this.resetConfigForm();
+        },
+        error: () => {
+          this.resetConfigForm();
+          this.notificationService.error('Caricamento configurazione 104 non riuscito');
+        }
+      });
+  }
+
   private nextId(prefix: string): string {
     this.sequence += 1;
     return `${prefix}-${this.sequence}`;
@@ -293,6 +377,77 @@ export class Permessi104Component {
 
   private buildAvailabilityLabel(days: number, hours: number): string {
     return this.isHourlyMode ? this.formatHourValue(hours) : this.formatDayValue(days);
+  }
+
+  private resetConfigForm(): void {
+    this.configForm.reset(
+      {
+        dataAccettazione: null,
+        dataInizioFruizione: null,
+        protocollo: '',
+        gradoParentela: '',
+        modalitaFruizione: 'GIORNI',
+        oreSettimanali: null,
+        giorniLavorativiSettimanali: null
+      },
+      { emitEvent: false }
+    );
+    this.recalculate();
+    this.refreshUsageMessages();
+  }
+
+  private applySavedConfig(config: Permesso104ConfigDto): void {
+    this.configForm.patchValue(
+      {
+        dataAccettazione: this.parseApiDate(config.dataAccettazione),
+        dataInizioFruizione: this.parseApiDate(config.dataInizioFruizione),
+        protocollo: config.protocollo ?? '',
+        gradoParentela: config.gradoParentela ?? '',
+        modalitaFruizione: config.modalitaFruizione ?? 'GIORNI',
+        oreSettimanali: this.normalizeNumber(config.oreSettimanali),
+        giorniLavorativiSettimanali: this.normalizeNumber(config.giorniLavorativiSettimanali)
+      },
+      { emitEvent: false }
+    );
+    this.recalculate();
+    this.refreshUsageMessages();
+  }
+
+  private toDto(userId: string): Permesso104ConfigDto {
+    return {
+      ...(this.savedConfig ?? {}),
+      userId,
+      dataAccettazione: this.configForm.controls.dataAccettazione.value ? toIsoDate(this.configForm.controls.dataAccettazione.value) : null,
+      dataInizioFruizione: this.configForm.controls.dataInizioFruizione.value ? toIsoDate(this.configForm.controls.dataInizioFruizione.value) : null,
+      protocollo: this.configForm.controls.protocollo.value.trim(),
+      gradoParentela: this.configForm.controls.gradoParentela.value,
+      modalitaFruizione: this.currentMode,
+      oreSettimanali: this.normalizeNumber(this.configForm.controls.oreSettimanali.value),
+      giorniLavorativiSettimanali: this.normalizeNumber(this.configForm.controls.giorniLavorativiSettimanali.value)
+    };
+  }
+
+  private parseApiDate(value: string | null | undefined): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const parsed = parseISO(value);
+    if (isValid(parsed)) {
+      return parsed;
+    }
+
+    const fallback = new Date(value);
+    return isValid(fallback) ? fallback : null;
+  }
+
+  private normalizeNumber(value: number | string | null | undefined): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const normalized = Number(value);
+    return Number.isFinite(normalized) ? normalized : null;
   }
 
   private formatNumber(value: number): string {
